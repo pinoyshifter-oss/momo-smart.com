@@ -40,7 +40,8 @@ waitlist" buttons lead to:
   with `npm run db:studio`.
 - **Scheduled reset.** `GET /api/demo/reset` with
   `Authorization: Bearer $CRON_SECRET` re-runs the seed so visitors' changes
-  do not pile up. `vercel.json` schedules it every 6 hours; any external cron
+  do not pile up. `vercel.json` schedules it once a day at 05:00 UTC (Vercel's
+  Hobby plan allows daily crons only); any external cron
   that sends the header works too. `WaitlistEntry` is never reset.
 
 The one-click sign-in, the banner and the reset route are only active when

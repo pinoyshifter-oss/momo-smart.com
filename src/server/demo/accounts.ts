@@ -28,8 +28,11 @@ export const DEMO_ACCOUNTS = [
 
 export type DemoAccountKey = (typeof DEMO_ACCOUNTS)[number]["key"];
 
-/** How often the scheduled reset rebuilds the demo school, for display. */
-export const DEMO_RESET_HOURS = 6;
+/**
+ * How often the scheduled reset rebuilds the demo school, for display. Matches
+ * the daily cron in `vercel.json` — Vercel's Hobby plan allows daily crons only.
+ */
+export const DEMO_RESET_HOURS = 24;
 
 /** True for the shared accounts a public visitor can sign into from `/demo`. */
 export function isDemoEmail(email: string | null | undefined): boolean {
