@@ -32,10 +32,20 @@ export default async function StudentCourses({
 }) {
   const params = await searchParams;
   const requestedCourse = param(params.course) ?? null;
-  const sections = await api.course.mySections();
+  const requestedLesson = param(params.lesson);
+  // The resume point only matters when no lesson or course is named; fetch it
+  // alongside the sections rather than after them.
+  const [sections, resume] = await Promise.all([
+    api.course.mySections(),
+    !requestedLesson && !requestedCourse
+      ? api.lesson.resumePoint()
+      : Promise.resolve(null),
+  ]);
 
   const lessonId =
-    param(params.lesson) ?? (await pickLesson(requestedCourse, sections));
+    requestedLesson ??
+    resume?.lesson.id ??
+    (await pickLesson(requestedCourse, sections));
   const lesson = lessonId ? await loadLesson(lessonId) : null;
   const activeCourseId =
     lesson?.unit.course.id ?? requestedCourse ?? sections[0]?.course.id;
@@ -190,18 +200,13 @@ function CourseSwitcher({
 }
 
 /**
- * The lesson to open when none is named: the one the student last worked on,
- * or for a chosen course, its in-progress lesson, else its first unfinished.
+ * The lesson to open when none is named and there is no resume point: the
+ * chosen course's in-progress lesson, else its first unfinished.
  */
 async function pickLesson(
   courseId: string | null,
   sections: Sections,
 ): Promise<string | null> {
-  if (!courseId) {
-    const resume = await api.lesson.resumePoint();
-    if (resume) return resume.lesson.id;
-  }
-
   const targetCourse = courseId ?? sections[0]?.course.id;
   if (!targetCourse) return null;
 

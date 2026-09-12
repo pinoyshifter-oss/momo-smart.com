@@ -25,14 +25,14 @@ export default async function TeacherLayout({
   if (!session?.user) redirect("/login");
   if (session.user.role === "STUDENT") redirect(homeForRole("STUDENT"));
 
-  const [me, overview, unread] = await Promise.all([
+  const [me, overview, unread, sections] = await Promise.all([
     api.user.me(),
     api.dashboard.teacherOverview(),
     api.notification.unreadCount(),
+    api.course.mySections(),
   ]);
 
   const teacherName = [me.title, me.name].filter(Boolean).join(" ");
-  const sections = await api.course.mySections();
   // The sidebar's focus label follows whichever course the teacher runs most.
   const focus =
     sections[0]?.course.name ??
