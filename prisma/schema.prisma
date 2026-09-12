@@ -14,8 +14,10 @@
 // person can hold several roles without polluting the academic record.
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  /// "native" for local dev; "rhel-openssl-3.0.x" is Vercel's serverless runtime.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {

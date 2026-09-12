@@ -13,6 +13,9 @@
 /prisma/db.sqlite-journal
 db.sqlite
 
+# prisma client — rebuilt by `prisma generate` on install
+/generated
+
 # next.js
 /.next/
 /out/
