@@ -8,7 +8,7 @@ import { courseRouter } from "~/server/api/routers/course";
 import { dashboardRouter } from "~/server/api/routers/dashboard";
 import { gradingRouter } from "~/server/api/routers/grading";
 import { lessonRouter } from "~/server/api/routers/lesson";
-import { messageRouter } from "~/server/api/routers/message";
+import { messagingRouter } from "~/server/api/routers/messaging";
 import { notificationRouter } from "~/server/api/routers/notification";
 import { submissionRouter } from "~/server/api/routers/submission";
 import { userRouter } from "~/server/api/routers/user";
@@ -28,7 +28,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  *   alert         at-risk detection and interventions
  *   dashboard     teacher command center + student overview
  *   announcement  section and school announcements
- *   message       direct messaging
+ *   messaging     contacts and opening conversations (messages live in Convex)
  *   notification  in-app notification feed
  *   calendar      agenda, timetable and office hours
  */
@@ -44,7 +44,7 @@ export const appRouter = createTRPCRouter({
   alert: alertRouter,
   dashboard: dashboardRouter,
   announcement: announcementRouter,
-  message: messageRouter,
+  messaging: messagingRouter,
   notification: notificationRouter,
   calendar: calendarRouter,
 });

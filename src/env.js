@@ -25,6 +25,14 @@ export const env = createEnv({
       .transform((value) => value === "true"),
     /** Bearer token the demo reset route requires. */
     CRON_SECRET: z.string().optional(),
+    /**
+     * Messaging runs on Convex, apart from DATABASE_URL. These three are
+     * written by `npm run messaging:setup`; without them the Messages pages
+     * show setup instructions instead of the inbox.
+     */
+    MESSAGING_JWT_PRIVATE_KEY: z.string().optional(),
+    MESSAGING_JWT_ISSUER: z.string().url().optional(),
+    MESSAGING_SERVER_SECRET: z.string().min(32).optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -36,7 +44,8 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    /** The Convex deployment messaging talks to; `npx convex dev` sets it. */
+    NEXT_PUBLIC_CONVEX_URL: z.string().url().optional(),
   },
 
   /**
@@ -49,6 +58,10 @@ export const env = createEnv({
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     DEMO_MODE: process.env.DEMO_MODE,
     CRON_SECRET: process.env.CRON_SECRET,
+    MESSAGING_JWT_PRIVATE_KEY: process.env.MESSAGING_JWT_PRIVATE_KEY,
+    MESSAGING_JWT_ISSUER: process.env.MESSAGING_JWT_ISSUER,
+    MESSAGING_SERVER_SECRET: process.env.MESSAGING_SERVER_SECRET,
+    NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
     NODE_ENV: process.env.NODE_ENV,
   },
   /**
