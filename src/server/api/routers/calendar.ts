@@ -8,13 +8,51 @@ import {
   teacherProcedure,
 } from "~/server/api/trpc";
 import {
+  addDays,
+  atTime,
   dayOfWeekOf,
   endOfDay,
+  isOddRotationDay,
   startOfDay,
   toDateOnly,
 } from "~/server/lib/dates";
 import { assertTeachesSection } from "~/server/lib/permissions";
-import type { Prisma } from "../../../../generated/prisma";
+import { starsAvailable } from "~/server/lib/stars";
+import type { CalendarEventType, Prisma } from "../../../../generated/prisma";
+
+/** The longest range the student schedule expands at once (a month grid is 42 days). */
+const MAX_SCHEDULE_DAYS = 62;
+
+type ScheduleKind = "class" | "due" | "exam" | "event";
+
+/** One dated item on the student calendar, whatever it came from. */
+type ScheduleEntry = {
+  id: string;
+  kind: ScheduleKind;
+  title: string;
+  courseName: string | null;
+  startAt: Date;
+  endAt: Date | null;
+  allDay: boolean;
+  location: string | null;
+  /** Teacher for a class, description for an event. */
+  detail: string | null;
+  /** Points possible, for deadlines only. */
+  points: number | null;
+  stars: number;
+  /** A deadline the student has already handed in (or been excused from). */
+  done: boolean;
+  href: string | null;
+};
+
+const EVENT_KIND: Record<CalendarEventType, ScheduleKind> = {
+  CLASS: "class",
+  EXAM: "exam",
+  ASSIGNMENT_DUE: "due",
+  OFFICE_HOURS: "event",
+  SCHOOL_EVENT: "event",
+  ADMIN_DEADLINE: "event",
+};
 
 export const calendarRouter = createTRPCRouter({
   /**
@@ -153,6 +191,224 @@ export const calendarRouter = createTRPCRouter({
         },
       });
     }),
+
+  /**
+   * The student calendar for a date range: weekly class meetings expanded
+   * into dated sessions, assignment and exam deadlines with the student's own
+   * submission state, and section or school-wide events. Administrative
+   * deadlines are staff business and left out.
+   */
+  studentSchedule: studentProcedure
+    .input(
+      z
+        .object({ from: z.date(), to: z.date() })
+        .refine(
+          ({ from, to }) =>
+            to >= from &&
+            to.getTime() - from.getTime() <=
+              MAX_SCHEDULE_DAYS * 24 * 60 * 60 * 1000,
+          { message: `Ask for at most ${MAX_SCHEDULE_DAYS} days at a time.` },
+        ),
+    )
+    .query(async ({ ctx, input }) => {
+      const from = startOfDay(input.from);
+      const to = endOfDay(input.to);
+      const mySections: Prisma.SectionWhereInput = {
+        enrollments: { some: { studentId: ctx.studentId, status: "ACTIVE" } },
+      };
+
+      const [events, assignments, meetings] = await Promise.all([
+        ctx.db.calendarEvent.findMany({
+          where: {
+            startAt: { gte: from, lte: to },
+            type: { not: "ADMIN_DEADLINE" },
+            OR: [{ sectionId: null }, { section: mySections }],
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            type: true,
+            startAt: true,
+            endAt: true,
+            allDay: true,
+            location: true,
+            section: { select: { course: { select: { name: true } } } },
+          },
+        }),
+        ctx.db.assignment.findMany({
+          where: {
+            publishedAt: { not: null },
+            dueAt: { gte: from, lte: to },
+            section: mySections,
+          },
+          select: {
+            id: true,
+            title: true,
+            type: true,
+            pointsPossible: true,
+            dueAt: true,
+            section: { select: { course: { select: { name: true } } } },
+            submissions: {
+              where: { studentId: ctx.studentId },
+              orderBy: { attempt: "desc" },
+              take: 1,
+              select: { status: true },
+            },
+          },
+        }),
+        ctx.db.sectionMeeting.findMany({
+          where: { section: { ...mySections, term: { isCurrent: true } } },
+          orderBy: { startTime: "asc" },
+          select: {
+            id: true,
+            dayOfWeek: true,
+            rotation: true,
+            startTime: true,
+            endTime: true,
+            room: true,
+            section: {
+              select: {
+                room: true,
+                course: { select: { name: true } },
+                teacher: {
+                  select: { user: { select: { name: true, title: true } } },
+                },
+                term: { select: { startDate: true, endDate: true } },
+              },
+            },
+          },
+        }),
+      ]);
+
+      const entries: ScheduleEntry[] = [];
+
+      for (
+        let day = startOfDay(from);
+        day.getTime() <= to.getTime();
+        day = addDays(day, 1)
+      ) {
+        const weekday = dayOfWeekOf(day);
+        for (const meeting of meetings) {
+          const { term, teacher } = meeting.section;
+          if (meeting.dayOfWeek !== weekday) continue;
+          if (day < startOfDay(term.startDate) || day > term.endDate) continue;
+          if (
+            meeting.rotation !== "ALL" &&
+            (meeting.rotation === "ODD") !==
+              isOddRotationDay(term.startDate, day)
+          ) {
+            continue;
+          }
+          entries.push({
+            id: `class-${meeting.id}-${day.getTime()}`,
+            kind: "class",
+            title: meeting.section.course.name,
+            courseName: meeting.section.course.name,
+            startAt: atTime(day, meeting.startTime),
+            endAt: atTime(day, meeting.endTime),
+            allDay: false,
+            location: meeting.room ?? meeting.section.room,
+            detail:
+              [teacher.user.title, teacher.user.name]
+                .filter(Boolean)
+                .join(" ") || null,
+            points: null,
+            stars: 0,
+            done: false,
+            href: "/student/courses",
+          });
+        }
+      }
+
+      for (const { submissions, ...assignment } of assignments) {
+        const status = submissions[0]?.status;
+        entries.push({
+          id: `due-${assignment.id}`,
+          kind:
+            assignment.type === "EXAM" || assignment.type === "QUIZ"
+              ? "exam"
+              : "due",
+          title: assignment.title,
+          courseName: assignment.section.course.name,
+          startAt: assignment.dueAt,
+          endAt: null,
+          allDay: false,
+          location: null,
+          detail: null,
+          points: assignment.pointsPossible,
+          stars: starsAvailable(assignment),
+          done:
+            status === "SUBMITTED" ||
+            status === "GRADED" ||
+            status === "EXCUSED",
+          href: `/student/assignments?assignment=${assignment.id}`,
+        });
+      }
+
+      for (const event of events) {
+        entries.push({
+          id: `event-${event.id}`,
+          kind: EVENT_KIND[event.type],
+          title: event.title,
+          courseName: event.section?.course.name ?? null,
+          startAt: event.startAt,
+          endAt: event.endAt,
+          allDay: event.allDay,
+          location: event.location,
+          detail: event.description,
+          points: null,
+          stars: 0,
+          done: false,
+          href: null,
+        });
+      }
+
+      return entries.sort((a, b) => a.startAt.getTime() - b.startAt.getTime());
+    }),
+
+  /** Today's office hours held by the student's own teachers. */
+  studentOfficeHours: studentProcedure.query(async ({ ctx }) => {
+    const now = new Date();
+
+    return ctx.db.officeHour.findMany({
+      where: {
+        dayOfWeek: dayOfWeekOf(now),
+        teacher: {
+          sections: {
+            some: {
+              term: { isCurrent: true },
+              enrollments: {
+                some: { studentId: ctx.studentId, status: "ACTIVE" },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { startTime: "asc" },
+      select: {
+        id: true,
+        startTime: true,
+        endTime: true,
+        mode: true,
+        location: true,
+        meetingUrl: true,
+        capacity: true,
+        label: true,
+        teacher: {
+          select: {
+            user: { select: { name: true, title: true } },
+            department: { select: { name: true } },
+          },
+        },
+        _count: {
+          select: {
+            bookings: { where: { date: toDateOnly(now), status: "RESERVED" } },
+          },
+        },
+      },
+    });
+  }),
 
   createEvent: teacherProcedure
     .input(

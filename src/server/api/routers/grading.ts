@@ -1,9 +1,19 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, teacherProcedure } from "~/server/api/trpc";
-import { letterFor, refreshEnrollmentGrade, round } from "~/server/lib/grading";
+import {
+  createTRPCRouter,
+  studentProcedure,
+  teacherProcedure,
+} from "~/server/api/trpc";
+import {
+  computeSectionGrade,
+  letterFor,
+  refreshEnrollmentGrade,
+  round,
+} from "~/server/lib/grading";
 import { assertTeachesSection } from "~/server/lib/permissions";
+import { STAR_ASSIGNMENT_TYPES, starsFor } from "~/server/lib/stars";
 import type { Prisma } from "../../../../generated/prisma";
 
 /** Scopes a query to the sections the caller may grade. */
@@ -566,6 +576,229 @@ export const gradingRouter = createTRPCRouter({
             ]),
           ),
         })),
+      };
+    }),
+
+  /**
+   * The student's Scores page for one term (the current one by default):
+   * each enrolled section's running grade, its per-category breakdown and the
+   * released grades behind it, plus where the term average sits among
+   * grade-level peers. Unreleased grades are never exposed.
+   */
+  myScores: studentProcedure
+    .input(z.object({ termId: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const term = await ctx.db.term.findFirst({
+        where: input?.termId ? { id: input.termId } : { isCurrent: true },
+        select: { id: true, name: true, schoolYear: true, isCurrent: true },
+      });
+      if (!term) return null;
+
+      const enrolled = ["ACTIVE", "COMPLETED"] as const;
+      const [terms, profile, enrollments] = await Promise.all([
+        ctx.db.term.findMany({
+          where: { schoolYear: term.schoolYear },
+          orderBy: { startDate: "asc" },
+          select: { id: true, name: true, isCurrent: true },
+        }),
+        ctx.db.studentProfile.findUniqueOrThrow({
+          where: { id: ctx.studentId },
+          select: { gradeLevel: true },
+        }),
+        ctx.db.enrollment.findMany({
+          where: {
+            studentId: ctx.studentId,
+            status: { in: [...enrolled] },
+            section: { termId: term.id },
+          },
+          orderBy: { section: { period: "asc" } },
+          select: {
+            currentPercent: true,
+            currentLetter: true,
+            section: {
+              select: {
+                id: true,
+                code: true,
+                room: true,
+                course: {
+                  select: {
+                    name: true,
+                    code: true,
+                    colorToken: true,
+                    department: { select: { name: true } },
+                  },
+                },
+                teacher: {
+                  select: { user: { select: { name: true, title: true } } },
+                },
+                gradeCategories: {
+                  orderBy: { weightPercent: "desc" },
+                  select: { id: true, name: true, weightPercent: true },
+                },
+                assignments: {
+                  where: { publishedAt: { not: null } },
+                  orderBy: { dueAt: "desc" },
+                  select: {
+                    id: true,
+                    title: true,
+                    type: true,
+                    pointsPossible: true,
+                    dueAt: true,
+                    categoryId: true,
+                    submissions: {
+                      where: { studentId: ctx.studentId },
+                      orderBy: { attempt: "desc" },
+                      take: 1,
+                      select: {
+                        status: true,
+                        grade: {
+                          select: {
+                            status: true,
+                            score: true,
+                            releasedAt: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }),
+      ]);
+
+      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      let starsThisWeek = 0;
+
+      const subjects = await Promise.all(
+        enrollments.map(async ({ section, currentPercent, currentLetter }) => {
+          const items = section.assignments.map(
+            ({ submissions, ...assignment }) => {
+              const latest = submissions[0] ?? null;
+              const grade =
+                latest?.grade?.status === "RELEASED" ? latest.grade : null;
+              const stars =
+                grade && STAR_ASSIGNMENT_TYPES.includes(assignment.type)
+                  ? starsFor(grade.score)
+                  : 0;
+              if (grade?.releasedAt && grade.releasedAt.getTime() >= weekAgo) {
+                starsThisWeek += stars;
+              }
+              const status: "GRADED" | "EXCUSED" | "PENDING" = grade
+                ? "GRADED"
+                : latest?.status === "EXCUSED"
+                  ? "EXCUSED"
+                  : "PENDING";
+              return {
+                ...assignment,
+                status,
+                score: grade?.score ?? null,
+                stars,
+              };
+            },
+          );
+          const graded = items.filter((item) => item.status === "GRADED");
+
+          const categories = section.gradeCategories.map((category) => {
+            const scored = graded.filter(
+              (item) => item.categoryId === category.id,
+            );
+            const earned = scored.reduce((sum, i) => sum + (i.score ?? 0), 0);
+            const possible = scored.reduce(
+              (sum, i) => sum + i.pointsPossible,
+              0,
+            );
+            return {
+              ...category,
+              earned,
+              possible,
+              gradedCount: scored.length,
+              percent: possible > 0 ? round((earned / possible) * 100) : null,
+            };
+          });
+
+          // The cached running grade is refreshed on release; fall back to a
+          // live computation for enrollments that predate the cache.
+          const running =
+            currentPercent !== null
+              ? { percent: currentPercent, letter: currentLetter }
+              : graded.length > 0
+                ? await computeSectionGrade(ctx.db, section.id, ctx.studentId)
+                : null;
+
+          return {
+            sectionId: section.id,
+            sectionCode: section.code,
+            room: section.room,
+            course: section.course,
+            teacher: section.teacher.user,
+            percent: running?.percent ?? null,
+            letter: running?.letter ?? null,
+            categories,
+            items,
+            gradedCount: graded.length,
+            // Excused work never counts toward completion.
+            totalCount: items.filter((item) => item.status !== "EXCUSED")
+              .length,
+            stars: items.reduce((sum, item) => sum + item.stars, 0),
+          };
+        }),
+      );
+
+      const percents = subjects
+        .map((subject) => subject.percent)
+        .filter((percent): percent is number => percent !== null);
+      const average =
+        percents.length > 0
+          ? round(percents.reduce((sum, p) => sum + p, 0) / percents.length)
+          : null;
+
+      // Rank is one more than the number of grade-level peers whose term
+      // average beats ours.
+      let standing: { rank: number; cohortSize: number } | null = null;
+      if (average !== null) {
+        const peers = await ctx.db.enrollment.findMany({
+          where: {
+            status: { in: [...enrolled] },
+            currentPercent: { not: null },
+            studentId: { not: ctx.studentId },
+            section: { termId: term.id },
+            student: { gradeLevel: profile.gradeLevel },
+          },
+          select: { studentId: true, currentPercent: true },
+        });
+        const byStudent = new Map<string, number[]>();
+        for (const peer of peers) {
+          const list = byStudent.get(peer.studentId) ?? [];
+          list.push(peer.currentPercent ?? 0);
+          byStudent.set(peer.studentId, list);
+        }
+        const peerAverages = [...byStudent.values()].map(
+          (list) => list.reduce((sum, p) => sum + p, 0) / list.length,
+        );
+        standing = {
+          rank: peerAverages.filter((p) => p > average).length + 1,
+          cohortSize: peerAverages.length + 1,
+        };
+      }
+
+      return {
+        term,
+        terms,
+        gradeLevel: profile.gradeLevel,
+        average,
+        letter: average !== null ? letterFor(average) : null,
+        stars: {
+          total: subjects.reduce((sum, s) => sum + s.stars, 0),
+          thisWeek: starsThisWeek,
+        },
+        graded: {
+          count: subjects.reduce((sum, s) => sum + s.gradedCount, 0),
+          total: subjects.reduce((sum, s) => sum + s.totalCount, 0),
+        },
+        standing,
+        subjects,
       };
     }),
 });

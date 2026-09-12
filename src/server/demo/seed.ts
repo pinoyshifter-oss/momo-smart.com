@@ -14,6 +14,7 @@
 import { hashSync } from "bcryptjs";
 
 import type { PrismaClient } from "../../../generated/prisma";
+import { seedMessaging } from "../messaging/seed";
 import { DEMO_PASSWORD } from "./accounts";
 
 /**
@@ -1712,7 +1713,21 @@ async function build() {
   }
 
   // --- Message threads ------------------------------------------------------
-  const userIdOf = (name: string) => students.get(name)!.userId;
+  // Conversations live in Convex, not Postgres, so they are rebuilt there
+  // against the user ids created above.
+  const chenMember = {
+    userId: chenUser.id,
+    name: "Aris Chen",
+    title: "Dr.",
+    role: "TEACHER" as const,
+    subtitle: "Teacher • Science Department",
+  };
+  const studentMember = (name: string) => ({
+    userId: students.get(name)!.userId,
+    name,
+    role: "STUDENT" as const,
+    subtitle: `Student • Gr. ${studentSeeds.find((s) => s.name === name)!.grade}`,
+  });
 
   const conversations: Array<{
     student: string;
@@ -1755,48 +1770,50 @@ async function build() {
         },
       ],
     },
+    {
+      student: "Alex Rivera",
+      subject: "Lab 4: Enzyme Catalysis write-up",
+      messages: [
+        {
+          from: "student",
+          body: "Hi Dr. Chen — for the Lab 4 error analysis, should the standard deviation be taken across all three trials, or reported per trial?",
+          minutesAgo: 1500,
+        },
+        {
+          from: "teacher",
+          body: "Good question, Alex. Take it across all three trials, then note any trial you would exclude and why. Per-trial numbers can go in an appendix table.",
+          minutesAgo: 1380,
+        },
+        {
+          from: "student",
+          body: "Thank you! One more — should the Q10 calculation go in Results or in the Discussion?",
+          minutesAgo: 70,
+        },
+        {
+          from: "teacher",
+          body: "Show the calculation in Results and interpret it in the Discussion. Bring your draft to office hours today if you'd like a quick look before you submit.",
+          minutesAgo: 12,
+        },
+      ],
+    },
   ];
 
-  for (const thread of conversations) {
-    const conversation = await db.conversation.create({
-      data: {
+  // Each member ends up having read up to their own last message, so a
+  // reply the other side hasn't opened yet shows as unread.
+  await seedMessaging(
+    conversations.map((thread) => {
+      const student = studentMember(thread.student);
+      return {
         subject: thread.subject,
-        participants: {
-          create: [
-            { userId: chenUser.id, lastReadAt: NOW },
-            { userId: userIdOf(thread.student) },
-          ],
-        },
-      },
-    });
-
-    for (const message of thread.messages) {
-      await db.message.create({
-        data: {
-          conversationId: conversation.id,
-          senderId:
-            message.from === "teacher" ? chenUser.id : userIdOf(thread.student),
+        members: [chenMember, student],
+        messages: thread.messages.map((message) => ({
+          senderId: message.from === "teacher" ? chenUser.id : student.userId,
           body: message.body,
-          sentAt: new Date(NOW.getTime() - message.minutesAgo * 60_000),
-        },
-      });
-    }
-
-    // Leave the student's last word unread so the inbox shows a badge.
-    const lastFromStudent = thread.messages
-      .filter((message) => message.from === "student")
-      .at(-1);
-    if (lastFromStudent) {
-      await db.conversationParticipant.updateMany({
-        where: { conversationId: conversation.id, userId: chenUser.id },
-        data: {
-          lastReadAt: new Date(
-            NOW.getTime() - (lastFromStudent.minutesAgo + 5) * 60_000,
-          ),
-        },
-      });
-    }
-  }
+          sentAt: NOW.getTime() - message.minutesAgo * 60_000,
+        })),
+      };
+    }),
+  );
 
   return {
     term: term.name,
