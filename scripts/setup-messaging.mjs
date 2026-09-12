@@ -24,11 +24,14 @@ const deployKey = process.env.CONVEX_DEPLOY_KEY;
 const issuer =
   process.env.MESSAGING_JWT_ISSUER ?? "https://momosmart.edu/messaging";
 
-// Refuse before generating anything, so a missing key can't touch dev.
-if (production && !deployKey?.startsWith("prod:")) {
+// Refuse before generating anything, so a missing or partial key can't touch
+// dev. A production deploy key looks like `prod:<deployment-name>|<token>`.
+if (production && !/^prod:[^|\s]+\|\S+$/.test(deployKey ?? "")) {
   console.error(
-    "--prod needs a Production deploy key from the Convex dashboard:\n" +
-      "  CONVEX_DEPLOY_KEY='prod:…' npm run messaging:setup -- --prod",
+    "--prod needs the full Production deploy key from the Convex dashboard\n" +
+      "(Production deployment → Settings → Generate Production Deploy Key).\n" +
+      "It looks like prod:<deployment-name>|<token> — copy all of it, then run:\n" +
+      "  CONVEX_DEPLOY_KEY='<your key>' npm run messaging:setup -- --prod",
   );
   process.exit(1);
 }
@@ -65,9 +68,16 @@ const deploymentVars = {
 };
 for (const [name, value] of Object.entries(deploymentVars)) {
   // The CLI reports which deployment it set the variable on (never the value).
-  execFileSync("npx", ["convex", "env", "set", name, value], {
-    stdio: ["ignore", "ignore", "inherit"],
-  });
+  try {
+    execFileSync("npx", ["convex", "env", "set", name, value], {
+      stdio: ["ignore", "ignore", "inherit"],
+    });
+  } catch {
+    console.error(
+      `\nCouldn't set ${name} on the Convex deployment (see the message above). Nothing was written to ${ENV_FILE}.`,
+    );
+    process.exit(1);
+  }
 }
 
 let text = existsSync(ENV_FILE) ? readFileSync(ENV_FILE, "utf8") : "";
