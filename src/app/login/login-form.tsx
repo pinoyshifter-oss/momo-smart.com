@@ -3,16 +3,15 @@
 import { useActionState, useId, useState } from "react";
 
 import { AlertIcon, ArrowRightIcon, LockIcon } from "~/app/_components/icons";
-// Accounts created by `npm run db:seed`, offered as one-tap fill.
-import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "~/server/demo/accounts";
 import { login, type LoginState } from "./actions";
 
 const initialState: LoginState = { error: null };
 
 export function LoginForm() {
   const [state, formAction, pending] = useActionState(login, initialState);
+  // Controlled so a failed attempt keeps the email; React resets uncontrolled
+  // fields once a form action finishes.
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const emailId = useId();
   const passwordId = useId();
@@ -77,8 +76,6 @@ export function LoginForm() {
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             required
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
             placeholder="••••••••"
             className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand focus:ring-4 focus:ring-brand/12"
           />
@@ -100,41 +97,6 @@ export function LoginForm() {
           Sessions last 12 hours and are signed on the server.
         </p>
       </form>
-
-      <div className="mt-8 rounded-2xl border border-line bg-canvas p-4">
-        <p className="text-xs font-semibold tracking-[0.12em] text-muted uppercase">
-          Demo accounts
-        </p>
-        <p className="mt-1 text-xs text-muted">
-          Seeded by <code className="font-semibold">npm run db:seed</code>. Password:{" "}
-          <code className="font-semibold text-ink">{DEMO_PASSWORD}</code>
-        </p>
-        <div className="mt-3 grid gap-2">
-          {DEMO_ACCOUNTS.map((account) => (
-            <button
-              key={account.email}
-              type="button"
-              onClick={() => {
-                setEmail(account.email);
-                setPassword(DEMO_PASSWORD);
-              }}
-              className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-3 py-2.5 text-left transition hover:border-brand/40 hover:bg-brand-soft"
-            >
-              <span className="min-w-0">
-                <span className="block text-sm font-semibold text-ink">
-                  {account.name}
-                </span>
-                <span className="block truncate text-xs text-muted">
-                  {account.email}
-                </span>
-              </span>
-              <span className="shrink-0 rounded-full bg-brand-soft px-2.5 py-1 text-[11px] font-bold text-brand">
-                {account.role}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
