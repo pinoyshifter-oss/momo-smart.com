@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { env } from "~/env";
 import { auth } from "~/server/auth";
+import { homeForRole } from "~/server/auth/home";
 import { isMessagingConfigured } from "~/server/messaging/convex";
 import { api } from "~/trpc/server";
 import { MessagesHub } from "./messages-hub";
@@ -16,6 +17,9 @@ import { MessagingSetupNotice } from "./setup-notice";
 export async function MessagingPage({ basePath }: { basePath: string }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
+  if (session.user.role === "SUPERADMIN") {
+    redirect(homeForRole(session.user.role));
+  }
   if (!isMessagingConfigured() || !env.NEXT_PUBLIC_CONVEX_URL) {
     return <MessagingSetupNotice />;
   }

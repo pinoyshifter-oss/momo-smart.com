@@ -12,6 +12,7 @@ import { messagingRouter } from "~/server/api/routers/messaging";
 import { notificationRouter } from "~/server/api/routers/notification";
 import { submissionRouter } from "~/server/api/routers/submission";
 import { userRouter } from "~/server/api/routers/user";
+import { waitlistRouter } from "~/server/api/routers/waitlist";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -31,8 +32,10 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  *   messaging     contacts and opening conversations (messages live in Convex)
  *   notification  in-app notification feed
  *   calendar      agenda, timetable and office hours
+ *   waitlist      early-access signups (superadmin only)
  */
 export const appRouter = createTRPCRouter({
+  waitlist: waitlistRouter,
   user: userRouter,
   course: courseRouter,
   lesson: lessonRouter,

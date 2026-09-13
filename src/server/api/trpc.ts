@@ -178,6 +178,28 @@ export const adminProcedure = t.procedure
   .use(timingMiddleware)
   .use(enforceRoles(["ADMIN"]));
 
+/**
+ * Any signed-in member of the school — everyone except the platform
+ * superadmin, who has no place in school features such as messaging.
+ */
+export const schoolProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.session.user.role === "SUPERADMIN") {
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+  return next();
+});
+
+/**
+ * Platform operator only. Deliberately not covered by the ADMIN bypass in
+ * `enforceRoles`: school admins never see platform data such as the waitlist.
+ */
+export const superadminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.session.user.role !== "SUPERADMIN") {
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+  return next();
+});
+
 /** Either side of the classroom — used by shared reads such as announcements. */
 export const staffOrStudentProcedure = t.procedure
   .use(timingMiddleware)

@@ -33,6 +33,9 @@ enum UserRole {
   STUDENT
   TEACHER
   ADMIN
+  /// Platform operator. Sees only the waitlist console at /superadmin — no
+  /// school data — and is never removed by the demo reset.
+  SUPERADMIN
 }
 
 model User {

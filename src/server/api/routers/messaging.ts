@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, schoolProcedure } from "~/server/api/trpc";
 import { dayOfWeekOf } from "~/server/lib/dates";
 import { startConversation } from "~/server/messaging/convex";
 import type {
@@ -99,7 +99,16 @@ function subtitleFor(user: {
   return "Admin & Staff";
 }
 
-const ROLE_ORDER: Record<UserRole, number> = {
+/**
+ * Roles that take part in messaging — the ones `convex/model.ts` mirrors. The
+ * platform superadmin is never a sender, a contact or a recipient.
+ */
+type SchoolRole = Exclude<UserRole, "SUPERADMIN">;
+
+const isSchoolRole = (role: UserRole): role is SchoolRole =>
+  role !== "SUPERADMIN";
+
+const ROLE_ORDER: Record<SchoolRole, number> = {
   TEACHER: 0,
   STUDENT: 1,
   ADMIN: 2,
@@ -155,7 +164,7 @@ async function classmatesOf(
 
 export const messagingRouter = createTRPCRouter({
   /** People the caller may start a conversation with. */
-  contacts: protectedProcedure.query(async ({ ctx }) => {
+  contacts: schoolProcedure.query(async ({ ctx }) => {
     const actor = ctx.session.user;
     const [linked, admins] = await Promise.all([
       classmatesOf(ctx.db, actor),
@@ -172,13 +181,13 @@ export const messagingRouter = createTRPCRouter({
         userId: string;
         name: string;
         title: string | null;
-        role: UserRole;
+        role: SchoolRole;
         subtitle: string;
         courses: string[];
       }
     >();
     const add = (person: Person, course: string | null) => {
-      if (person.id === actor.id) return;
+      if (person.id === actor.id || !isSchoolRole(person.role)) return;
       const existing = contacts.get(person.id);
       if (existing) {
         if (course && !existing.courses.includes(course)) {
@@ -208,7 +217,7 @@ export const messagingRouter = createTRPCRouter({
    * The "Recipient Details" panel: who someone is and the classes the two of
    * them share this term, with the student's standing in each.
    */
-  dossier: protectedProcedure
+  dossier: schoolProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) => {
       const actor = ctx.session.user;
@@ -244,7 +253,7 @@ export const messagingRouter = createTRPCRouter({
           },
         },
       });
-      if (!person) {
+      if (!person || !isSchoolRole(person.role)) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Person not found.",
@@ -311,7 +320,7 @@ export const messagingRouter = createTRPCRouter({
     }),
 
   /** Opens a conversation in Convex once Postgres says the caller may. */
-  start: protectedProcedure
+  start: schoolProcedure
     .input(
       z.object({
         recipientIds: z.array(z.string()).min(1).max(20),
@@ -337,17 +346,32 @@ export const messagingRouter = createTRPCRouter({
         select: personSelect,
       });
 
+      const members = people.flatMap((person) =>
+        isSchoolRole(person.role)
+          ? [
+              {
+                userId: person.id,
+                name: person.name ?? "Unnamed",
+                role: person.role,
+                subtitle: subtitleFor(person),
+                ...(person.title ? { title: person.title } : {}),
+              },
+            ]
+          : [],
+      );
+      // An admin skips `assertMayMessage`'s lookup, so check here as well.
+      if (members.length !== people.length) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Recipient not found.",
+        });
+      }
+
       const conversationId = await startConversation({
         senderId: actor.id,
         body: input.body,
         ...(input.subject ? { subject: input.subject } : {}),
-        members: people.map((person) => ({
-          userId: person.id,
-          name: person.name ?? "Unnamed",
-          role: person.role,
-          subtitle: subtitleFor(person),
-          ...(person.title ? { title: person.title } : {}),
-        })),
+        members,
       });
       return { conversationId };
     }),

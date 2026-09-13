@@ -12,6 +12,10 @@ export async function GET() {
   if (!session?.user) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   }
+  // Messaging is a school feature; the platform superadmin has no inbox.
+  if (session.user.role === "SUPERADMIN") {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
   if (!isMessagingConfigured()) {
     return NextResponse.json(
       { error: "Messaging is not configured." },

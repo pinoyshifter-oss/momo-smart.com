@@ -23,7 +23,9 @@ export default async function TeacherLayout({
 }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
-  if (session.user.role === "STUDENT") redirect(homeForRole("STUDENT"));
+  if (session.user.role !== "TEACHER" && session.user.role !== "ADMIN") {
+    redirect(homeForRole(session.user.role));
+  }
 
   const [me, overview, unread, sections] = await Promise.all([
     api.user.me(),

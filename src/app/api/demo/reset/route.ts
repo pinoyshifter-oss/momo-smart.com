@@ -14,7 +14,8 @@ export const dynamic = "force-dynamic";
  * Rebuilds the demo school, wiping whatever visitors changed. Called on a
  * schedule (see `vercel.json`) with `Authorization: Bearer $CRON_SECRET`.
  *
- * Only live when DEMO_MODE is on: the reset deletes every user, so it must
+ * Only live when DEMO_MODE is on: the reset deletes every user except the
+ * superadmin, so it must
  * never be reachable on a database that holds real schools.
  */
 export async function GET(request: Request) {

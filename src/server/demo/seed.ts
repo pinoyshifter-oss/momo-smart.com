@@ -8,8 +8,9 @@
  *
  * Run by `npm run db:seed` (prisma/seed.ts) and by the scheduled demo reset
  * (/api/demo/reset). It is idempotent — re-running resets the seeded rows
- * rather than duplicating them. The reset deletes EVERY user and all academic
- * data, so only ever point it at a development or dedicated demo database.
+ * rather than duplicating them. The reset deletes every user except the
+ * platform superadmin, and all academic data, so only ever point it at a
+ * development or dedicated demo database.
  */
 import { hashSync } from "bcryptjs";
 
@@ -123,9 +124,10 @@ async function reset() {
     db.teacherProfile.deleteMany(),
     db.studentProfile.deleteMany(),
     db.department.deleteMany(),
-    db.session.deleteMany(),
-    db.account.deleteMany(),
-    db.user.deleteMany(),
+    // The platform superadmin is not demo data and survives every reset.
+    db.session.deleteMany({ where: { user: { role: { not: "SUPERADMIN" } } } }),
+    db.account.deleteMany({ where: { user: { role: { not: "SUPERADMIN" } } } }),
+    db.user.deleteMany({ where: { role: { not: "SUPERADMIN" } } }),
   ]);
 }
 

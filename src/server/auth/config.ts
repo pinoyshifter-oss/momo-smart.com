@@ -48,7 +48,7 @@ type SessionClaims = {
   teacherId: string | null;
 };
 
-const ROLES: UserRole[] = ["STUDENT", "TEACHER", "ADMIN"];
+const ROLES: UserRole[] = ["STUDENT", "TEACHER", "ADMIN", "SUPERADMIN"];
 
 const asString = (value: unknown): string | null =>
   typeof value === "string" && value.length > 0 ? value : null;
