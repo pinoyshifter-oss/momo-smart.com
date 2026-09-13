@@ -15,5 +15,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    {
+      url: new URL("/register", SITE_URL).href,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
   ];
 }

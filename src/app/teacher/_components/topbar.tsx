@@ -11,11 +11,13 @@ export function Topbar({
   termName,
   week,
   teacherName,
+  photoUrl,
   unreadNotifications,
 }: {
   termName: string;
   week: number | null;
   teacherName: string;
+  photoUrl: string | null;
   unreadNotifications: number;
 }) {
   return (
@@ -74,7 +76,7 @@ export function Topbar({
               title={`${teacherName} — sign out`}
             >
               <span className="sr-only">Sign out</span>
-              <Avatar name={teacherName} size="lg" />
+              <Avatar name={teacherName} src={photoUrl} size="lg" />
             </button>
           </form>
         </div>

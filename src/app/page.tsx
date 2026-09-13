@@ -148,12 +148,20 @@ export default async function Home() {
               </form>
             </div>
           ) : (
-            <Link
-              href="/demo#waitlist"
-              className="bg-navy hover:bg-navy-deep rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition"
-            >
-              Join waitlist
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/register"
+                className="border-line text-ink hover:bg-canvas hidden rounded-xl border px-4 py-2.5 text-sm font-semibold transition sm:block"
+              >
+                Register as teacher
+              </Link>
+              <Link
+                href="/demo#waitlist"
+                className="bg-navy hover:bg-navy-deep rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition"
+              >
+                Join waitlist
+              </Link>
+            </div>
           )}
         </div>
       </header>
@@ -245,6 +253,15 @@ export default async function Home() {
                     Join the waitlist
                   </Link>
                 </div>
+                <p className="text-muted mt-5 text-sm">
+                  Are you a teacher?{" "}
+                  <Link
+                    href="/register"
+                    className="text-brand font-semibold hover:underline"
+                  >
+                    Register your account →
+                  </Link>
+                </p>
               </>
             )}
           </div>

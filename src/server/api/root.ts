@@ -10,6 +10,7 @@ import { gradingRouter } from "~/server/api/routers/grading";
 import { lessonRouter } from "~/server/api/routers/lesson";
 import { messagingRouter } from "~/server/api/routers/messaging";
 import { notificationRouter } from "~/server/api/routers/notification";
+import { organizationRouter } from "~/server/api/routers/organization";
 import { submissionRouter } from "~/server/api/routers/submission";
 import { userRouter } from "~/server/api/routers/user";
 import { waitlistRouter } from "~/server/api/routers/waitlist";
@@ -33,9 +34,11 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  *   notification  in-app notification feed
  *   calendar      agenda, timetable and office hours
  *   waitlist      early-access signups (superadmin only)
+ *   organization  school search for teacher registration (public)
  */
 export const appRouter = createTRPCRouter({
   waitlist: waitlistRouter,
+  organization: organizationRouter,
   user: userRouter,
   course: courseRouter,
   lesson: lessonRouter,

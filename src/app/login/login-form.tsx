@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useId, useState } from "react";
 
 import { AlertIcon, ArrowRightIcon, LockIcon } from "~/app/_components/icons";
@@ -97,6 +98,13 @@ export function LoginForm() {
           Sessions last 12 hours and are signed on the server.
         </p>
       </form>
+
+      <Link
+        href="/register"
+        className="border-line bg-surface text-ink hover:bg-canvas mt-6 flex w-full items-center justify-center rounded-xl border px-4 py-3 text-[15px] font-semibold transition"
+      >
+        New teacher? Register here
+      </Link>
     </div>
   );
 }

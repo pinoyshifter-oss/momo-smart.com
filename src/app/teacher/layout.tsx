@@ -36,17 +36,21 @@ export default async function TeacherLayout({
   ]);
 
   const teacherName = [me.title, me.name].filter(Boolean).join(" ");
-  // The sidebar's focus label follows whichever course the teacher runs most.
-  const focus =
-    sections[0]?.course.name ??
+  // Self-registered teachers have a subject but no department yet.
+  const department =
     me.teacherProfile?.department?.name ??
+    me.teacherProfile?.subject ??
     "Faculty";
+  // The sidebar's focus label follows whichever course the teacher runs most.
+  const focus = sections[0]?.course.name ?? department;
+  const photoUrl = me.teacherProfile?.photoUrl ?? null;
 
   return (
     <div className="bg-canvas flex min-h-screen">
       <Sidebar
         teacherName={teacherName || (me.name ?? "Teacher")}
-        department={me.teacherProfile?.department?.name ?? "Faculty"}
+        photoUrl={photoUrl}
+        department={department}
         focus={focus}
         ungradedCount={overview.ungradedCount}
         unreadMessages={unread}
@@ -60,6 +64,7 @@ export default async function TeacherLayout({
           termName={overview.term?.name ?? "Current term"}
           week={overview.term?.week ?? null}
           teacherName={me.name ?? "Teacher"}
+          photoUrl={photoUrl}
           unreadNotifications={unread}
         />
         <main className="min-w-0 flex-1 px-5 py-6 lg:px-8">{children}</main>

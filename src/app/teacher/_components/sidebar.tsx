@@ -16,12 +16,14 @@ import { Avatar } from "~/app/_components/ui";
 
 export function Sidebar({
   teacherName,
+  photoUrl,
   department,
   focus,
   ungradedCount,
   unreadMessages,
 }: {
   teacherName: string;
+  photoUrl: string | null;
   department: string;
   focus: string;
   ungradedCount: number;
@@ -70,7 +72,7 @@ export function Sidebar({
 
         {/* Signed-in teacher */}
         <div className="border-line bg-canvas mt-4 flex items-center gap-3 rounded-xl border px-3 py-2.5">
-          <Avatar name={teacherName} />
+          <Avatar name={teacherName} src={photoUrl} />
           <div className="min-w-0">
             <p className="text-ink truncate text-sm font-bold">{teacherName}</p>
             <p className="text-muted truncate text-xs">{department}</p>

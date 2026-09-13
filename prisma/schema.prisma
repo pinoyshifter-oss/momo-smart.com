@@ -149,9 +149,18 @@ model TeacherProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  employeeNumber String      @unique
+  employeeNumber String        @unique
   departmentId   String?
-  department     Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  department     Department?   @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  /// School the teacher chose or added during registration.
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  /// Main subject taught, e.g. "Biology".
+  subject        String?
+  /// Downscaled JPEG data URL from registration. Kept off `User.image` because
+  /// that field is copied into the session JWT cookie.
+  photoUrl       String?
+  phone          String?
   officeLocation String?
   bio            String?
 
@@ -159,6 +168,21 @@ model TeacherProfile {
   officeHours OfficeHour[]
 
   @@index([departmentId])
+  @@index([organizationId])
+}
+
+/// A school or organisation teachers belong to. Registering teachers pick an
+/// existing one or add theirs.
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  city      String?
+  /// Normalised name + city, so "Oakridge High" and "oakridge  high" in the
+  /// same city resolve to one row.
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  teachers TeacherProfile[]
 }
 
 enum GuardianRelationship {

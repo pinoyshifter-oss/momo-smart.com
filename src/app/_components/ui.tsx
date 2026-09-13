@@ -1,19 +1,35 @@
 import { avatarTone, initials } from "./format";
 
-/** Circular initials avatar; the schema has no uploaded photos by default. */
+/** Circular avatar: the photo when there is one, otherwise initials. */
 export function Avatar({
   name,
+  src,
   size = "md",
 }: {
   name: string | null | undefined;
-  size?: "sm" | "md" | "lg";
+  src?: string | null;
+  size?: "sm" | "md" | "lg" | "xl";
 }) {
   const dimensions =
     size === "sm"
       ? "size-8 text-[11px]"
       : size === "lg"
         ? "size-11 text-sm"
-        : "size-9 text-xs";
+        : size === "xl"
+          ? "size-20 text-xl"
+          : "size-9 text-xs";
+
+  if (src) {
+    return (
+      // Registration photos are small data URLs; next/image adds nothing.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt=""
+        className={`${dimensions} shrink-0 rounded-full object-cover`}
+      />
+    );
+  }
 
   return (
     <span

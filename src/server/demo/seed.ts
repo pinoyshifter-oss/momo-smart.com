@@ -122,6 +122,7 @@ async function reset() {
     db.guardianLink.deleteMany(),
     db.guardian.deleteMany(),
     db.teacherProfile.deleteMany(),
+    db.organization.deleteMany(),
     db.studentProfile.deleteMany(),
     db.department.deleteMany(),
     // The platform superadmin is not demo data and survives every reset.
