@@ -13,7 +13,7 @@ export function Announcements({ items }: { items: Announcement[] }) {
         title="Announcements"
         action={
           <span className="text-brand text-[11px] font-bold">
-            Momo Smart Daily
+            Smart Momo Daily
           </span>
         }
       />

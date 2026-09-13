@@ -65,10 +65,10 @@ export async function GET() {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Momo Smart//Student Calendar//EN",
+    "PRODID:-//Smart Momo//Student Calendar//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
-    "X-WR-CALNAME:Momo Smart",
+    "X-WR-CALNAME:Smart Momo",
   ];
 
   for (const entry of entries) {
@@ -105,7 +105,7 @@ export async function GET() {
   return new Response(`${lines.map(fold).join("\r\n")}\r\n`, {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
-      "Content-Disposition": 'attachment; filename="momo-smart-calendar.ics"',
+      "Content-Disposition": 'attachment; filename="smart-momo-calendar.ics"',
       "Cache-Control": "no-store",
     },
   });

@@ -10,7 +10,7 @@ import { scoresHref } from "./_components/shared";
 import { StatCards } from "./_components/stat-cards";
 import { SubjectCard } from "./_components/subject-card";
 
-export const metadata: Metadata = { title: "Scores & Grading · Momo Smart" };
+export const metadata: Metadata = { title: "Scores & Grading" };
 
 /** Grades are released while the student browses, so never cache. */
 export const dynamic = "force-dynamic";

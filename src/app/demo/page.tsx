@@ -6,19 +6,28 @@ import { CheckIcon, LockIcon } from "~/app/_components/icons";
 import { PeekingDog } from "~/app/_components/peeking-dog";
 import { env } from "~/env";
 import { DEMO_RESET_HOURS } from "~/server/demo/accounts";
+import { SITE_NAME, socialMetadata } from "~/server/site";
 import { DemoRoleCard } from "./_components/demo-role-card";
 import { WaitlistForm } from "./_components/waitlist-form";
 
+const DESCRIPTION =
+  "Explore a live Smart Momo demo school as a teacher or a student — no signup needed — or request early access for your school.";
+
 export const metadata: Metadata = {
-  title: "Live demo · Momo Smart",
-  description:
-    "Explore a live demo school as a teacher or a student, or request early access for your school.",
+  title: "Live demo",
+  description: DESCRIPTION,
+  alternates: { canonical: "/demo" },
+  ...socialMetadata({
+    title: `Live demo · ${SITE_NAME}`,
+    description: DESCRIPTION,
+    path: "/demo",
+  }),
 };
 
 const EARLY_ACCESS = [
   "A walkthrough of the teacher and student views with your team",
   "Early access ahead of your next term",
-  "No commitment — we only follow up about Momo Smart",
+  "No commitment — we only follow up about Smart Momo",
 ];
 
 export default function DemoPage() {
@@ -61,7 +70,7 @@ export default function DemoPage() {
               {demoLive ? "Live demo · no signup" : "Early access"}
             </p>
             <h1 className="text-ink mt-5 text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl">
-              Explore a real school day in Momo Smart.
+              Explore a real school day in Smart Momo.
             </h1>
             <p className="text-muted mt-5 text-lg">
               Step into a working demo school: Dr. Aris Chen&apos;s AP Biology
@@ -106,7 +115,7 @@ export default function DemoPage() {
           <div className="mx-auto grid max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
             <div>
               <h2 className="text-ink text-3xl font-extrabold tracking-tight sm:text-4xl">
-                Bring Momo Smart to your school
+                Bring Smart Momo to your school
               </h2>
               <p className="text-muted mt-4 text-lg">
                 We&apos;re onboarding a small number of schools. Tell us about

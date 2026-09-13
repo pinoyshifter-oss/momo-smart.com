@@ -11,8 +11,9 @@ import { Sidebar } from "./_components/sidebar";
 import { Topbar } from "./_components/topbar";
 
 export const metadata: Metadata = {
-  title: "Student Dashboard · Momo Smart",
+  title: "Student Dashboard",
   description: "Coursework, due dates, grades and attendance in one place.",
+  robots: { index: false, follow: false },
 };
 
 export default async function StudentLayout({

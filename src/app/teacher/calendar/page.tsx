@@ -12,7 +12,7 @@ import { clock, longDate } from "~/app/_components/format";
 import { PageHeader } from "../_components/page-header";
 import { Card, CardHeader, EmptyState, Pill } from "~/app/_components/ui";
 
-export const metadata: Metadata = { title: "Calendar · Momo Smart" };
+export const metadata: Metadata = { title: "Calendar" };
 export const dynamic = "force-dynamic";
 
 const HORIZON_DAYS = 30;

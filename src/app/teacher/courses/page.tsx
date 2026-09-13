@@ -12,7 +12,7 @@ import { clock } from "~/app/_components/format";
 import { PageHeader } from "../_components/page-header";
 import { Card, EmptyState, Pill } from "~/app/_components/ui";
 
-export const metadata: Metadata = { title: "Courses · Momo Smart" };
+export const metadata: Metadata = { title: "Courses" };
 export const dynamic = "force-dynamic";
 
 const DAY_SHORT: Record<string, string> = {

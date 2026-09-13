@@ -11,7 +11,7 @@ import {
   Pill,
 } from "~/app/_components/ui";
 
-export const metadata: Metadata = { title: "Grades · Momo Smart" };
+export const metadata: Metadata = { title: "Grades" };
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{ section?: string }>;

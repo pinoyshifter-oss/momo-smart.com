@@ -14,7 +14,7 @@ import { LessonContent } from "./_components/lesson-content";
 import { LessonHeader, LockedLesson } from "./_components/lesson-header";
 import { UnitPlan } from "./_components/unit-plan";
 
-export const metadata: Metadata = { title: "Courses · Momo Smart" };
+export const metadata: Metadata = { title: "Courses" };
 
 /** Progress and notes change as the student works, so never cache. */
 export const dynamic = "force-dynamic";

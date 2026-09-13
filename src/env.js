@@ -12,6 +12,11 @@ export const env = createEnv({
         ? z.string()
         : z.string().optional(),
     DATABASE_URL: z.string().url(),
+    /**
+     * Public origin, e.g. "https://momosmart.com", for canonical URLs, the
+     * sitemap and social previews. Falls back to Vercel's production domain.
+     */
+    SITE_URL: z.string().url().optional(),
     /** UploadThing API token. Optional so the app runs without it; submission uploads need it. */
     UPLOADTHING_TOKEN: z.string().optional(),
     /**
@@ -55,6 +60,7 @@ export const env = createEnv({
   runtimeEnv: {
     AUTH_SECRET: process.env.AUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
+    SITE_URL: process.env.SITE_URL,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     DEMO_MODE: process.env.DEMO_MODE,
     CRON_SECRET: process.env.CRON_SECRET,

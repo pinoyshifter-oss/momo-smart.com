@@ -11,9 +11,10 @@ import { Sidebar } from "./_components/sidebar";
 import { Topbar } from "./_components/topbar";
 
 export const metadata: Metadata = {
-  title: "Teacher Command Center · Momo Smart",
+  title: "Teacher Command Center",
   description:
     "Rosters, grading queue, attendance and alerts for the school day.",
+  robots: { index: false, follow: false },
 };
 
 export default async function TeacherLayout({

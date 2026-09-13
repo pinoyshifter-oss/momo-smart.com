@@ -1,3 +1,4 @@
+import { type Metadata } from "next";
 import Link from "next/link";
 
 import { Wordmark } from "~/app/_components/brand";
@@ -15,7 +16,12 @@ import {
 } from "~/app/_components/icons";
 import { logout } from "~/app/login/actions";
 import { auth } from "~/server/auth";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "~/server/site";
 import { api } from "~/trpc/server";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const FEATURES = [
   {
@@ -64,6 +70,37 @@ const FOR_STUDENTS = [
   "Office-hour booking and attendance record",
 ];
 
+/** schema.org description of the product, for search engine rich results. */
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL.href}#organization`,
+      name: SITE_NAME,
+      url: SITE_URL.href,
+      logo: new URL("/icon.svg", SITE_URL).href,
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL.href}#website`,
+      name: SITE_NAME,
+      url: SITE_URL.href,
+      publisher: { "@id": `${SITE_URL.href}#organization` },
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: `${SITE_NAME} LMS`,
+      applicationCategory: "EducationalApplication",
+      operatingSystem: "Web",
+      description: SITE_DESCRIPTION,
+      url: SITE_URL.href,
+      featureList: FEATURES.map((feature) => feature.title),
+      publisher: { "@id": `${SITE_URL.href}#organization` },
+    },
+  ],
+};
+
 export default async function Home() {
   const session = await auth();
   const user = session?.user;
@@ -73,6 +110,13 @@ export default async function Home() {
 
   return (
     <div className="bg-canvas min-h-screen">
+      <script
+        type="application/ld+json"
+        // Escaping "<" keeps the JSON from ever closing the script tag early.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(STRUCTURED_DATA).replace(/</g, "\\u003c"),
+        }}
+      />
       <header className="border-line/80 bg-surface/85 sticky top-0 z-20 border-b backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <Wordmark label="Learning Management" />
@@ -185,7 +229,7 @@ export default async function Home() {
                   The command center for your whole school day.
                 </h1>
                 <p className="text-muted mt-5 max-w-xl text-lg">
-                  Momo Smart brings rosters, lessons, submissions, grading,
+                  Smart Momo brings rosters, lessons, submissions, grading,
                   assessments and attendance into one place — so teachers spend
                   the period teaching and students always know what is due.
                 </p>
@@ -296,7 +340,7 @@ export default async function Home() {
       <footer className="border-line bg-surface border-t">
         <div className="text-muted mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm sm:flex-row">
           <Wordmark href={null} />
-          <p>Momo Smart LMS · Fall 2024 Term 1</p>
+          <p>Smart Momo LMS · Fall 2024 Term 1</p>
         </div>
       </footer>
     </div>

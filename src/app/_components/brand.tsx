@@ -72,7 +72,7 @@ function GoldenRetriever({ className = "" }: { className?: string }) {
 }
 
 /**
- * Wordmark + role chip, matching the sidebar lockup ("Momo Smart" over a small
+ * Wordmark + role chip, matching the sidebar lockup ("Smart Momo" over a small
  * uppercase label).
  */
 export function Wordmark({
@@ -93,7 +93,7 @@ export function Wordmark({
             tone === "dark" ? "text-white" : "text-ink"
           }`}
         >
-          Momo Smart
+          Smart Momo
         </span>
         {label && (
           <span

@@ -22,7 +22,7 @@ import {
   type View,
 } from "./_components/shared";
 
-export const metadata: Metadata = { title: "Calendar · Momo Smart" };
+export const metadata: Metadata = { title: "Calendar" };
 
 /** Deadlines and submissions change as the student works, so never cache. */
 export const dynamic = "force-dynamic";

@@ -8,8 +8,9 @@ import { auth } from "~/server/auth";
 import { homeForRole } from "~/server/auth/home";
 
 export const metadata: Metadata = {
-  title: "Waitlist · Momo Smart",
+  title: "Waitlist",
   description: "Early-access requests from the public demo page.",
+  robots: { index: false, follow: false },
 };
 
 /**

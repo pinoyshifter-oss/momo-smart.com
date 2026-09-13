@@ -6,7 +6,7 @@ import { humanise } from "~/app/_components/format";
 import { PageHeader, SectionTabs } from "../_components/page-header";
 import { Card, CardHeader, EmptyState, Pill } from "~/app/_components/ui";
 
-export const metadata: Metadata = { title: "Assignments · Momo Smart" };
+export const metadata: Metadata = { title: "Assignments" };
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{ section?: string }>;

@@ -162,7 +162,7 @@ export function WaitlistForm({ source = "demo" }: { source?: string }) {
         )}
       </button>
       <p className="text-muted text-center text-xs">
-        We only use your email to follow up about Momo Smart.
+        We only use your email to follow up about Smart Momo.
       </p>
     </form>
   );

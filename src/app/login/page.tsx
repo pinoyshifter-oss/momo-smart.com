@@ -9,8 +9,10 @@ import { homeForRole } from "~/server/auth/home";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = {
-  title: "Sign in · Momo Smart",
-  description: "Sign in to your Momo Smart school account.",
+  title: "Sign in",
+  description: "Sign in to your Smart Momo school account.",
+  // Reachable by crawlers, but a sign-in form has no place in search results.
+  robots: { index: false, follow: true },
 };
 
 const HIGHLIGHTS = [
@@ -63,7 +65,7 @@ export default async function LoginPage() {
         </div>
 
         <p className="relative text-xs text-white/45">
-          Momo Smart LMS · Faculty, student and administrator access
+          Smart Momo LMS · Faculty, student and administrator access
         </p>
       </aside>
 

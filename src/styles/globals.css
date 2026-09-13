@@ -5,7 +5,7 @@
     var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
-  /* Momo Smart palette, taken from the product UI. */
+  /* Smart Momo palette, taken from the product UI. */
   --color-canvas: #f5f6fb;
   --color-surface: #ffffff;
   --color-line: #e5e8f0;
@@ -47,7 +47,7 @@
   }
 }
 
-/* Momo Smart is a light-surface product; keep the canvas stable. */
+/* Smart Momo is a light-surface product; keep the canvas stable. */
 html {
   color-scheme: light;
   background-color: var(--color-canvas);

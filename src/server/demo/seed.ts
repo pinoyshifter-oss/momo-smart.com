@@ -1,5 +1,5 @@
 /**
- * Demo school seed for the Momo Smart LMS.
+ * Demo school seed for the Smart Momo LMS.
  *
  * Builds one coherent slice of a school: a science department, an AP Biology
  * course with three sections taught by Dr. Aris Chen, a full unit of lessons,

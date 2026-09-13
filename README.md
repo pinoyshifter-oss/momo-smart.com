@@ -1,4 +1,4 @@
-# Momo Smart LMS
+# Smart Momo LMS
 
 A learning management system for schools — courses and sections, curriculum
 delivery, assignments and rubric grading, timed online assessments, period

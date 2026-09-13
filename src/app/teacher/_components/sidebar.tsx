@@ -57,7 +57,7 @@ export function Sidebar({
           <LogoMark className="size-9 shrink-0" />
           <div className="min-w-0">
             <p className="text-ink text-lg leading-tight font-extrabold tracking-tight">
-              Momo Smart
+              Smart Momo
             </p>
             <p className="text-muted mt-0.5 text-[10px] font-bold tracking-[0.1em] uppercase">
               Faculty • {focus}
@@ -107,7 +107,7 @@ export function Sidebar({
           </Link>
         </div>
         <p className="text-muted mt-3 px-3 text-[11px]">
-          Momo Smart LMS · Fall Term
+          Smart Momo LMS · Fall Term
         </p>
       </div>
     </aside>

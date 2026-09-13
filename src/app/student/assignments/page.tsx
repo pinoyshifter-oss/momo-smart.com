@@ -21,7 +21,7 @@ import {
 } from "./_components/shared";
 import { SubmitPanel } from "./_components/submit-panel";
 
-export const metadata: Metadata = { title: "My Assignments · Momo Smart" };
+export const metadata: Metadata = { title: "My Assignments" };
 
 /** Submissions and grades change as the student works, so never cache. */
 export const dynamic = "force-dynamic";
@@ -97,7 +97,7 @@ export default async function StudentAssignments({
         <div className="min-w-0">
           <p className="text-brand inline-flex items-center gap-1.5 text-xs font-semibold">
             <CheckCircleIcon className="size-4" />
-            Momo Smart Learning Pathway
+            Smart Momo Learning Pathway
           </p>
           <h1 className="text-navy mt-1 text-3xl font-extrabold tracking-tight">
             My Assignments

@@ -16,7 +16,7 @@ import { waitlistRouter } from "~/server/api/routers/waitlist";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
- * The primary router for the Momo Smart LMS API.
+ * The primary router for the Smart Momo LMS API.
  *
  *   user          identity, profiles, roster search
  *   course        sections, rosters, syllabus, enrolment

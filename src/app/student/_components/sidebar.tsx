@@ -49,7 +49,7 @@ export function Sidebar({
           <LogoMark className="size-9 shrink-0" />
           <div className="min-w-0">
             <p className="text-navy text-lg leading-tight font-extrabold tracking-tight">
-              Momo Smart
+              Smart Momo
             </p>
             <span className="bg-brand-soft text-navy mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase">
               Student • Gr. {gradeLevel}
