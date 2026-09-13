@@ -106,9 +106,7 @@ export function Sidebar({
             Help Center
           </Link>
         </div>
-        <p className="text-muted mt-3 px-3 text-[11px]">
-          Smart Momo LMS · Fall Term
-        </p>
+        <p className="text-muted mt-3 px-3 text-[11px]">Smart Momo LMS</p>
       </div>
     </aside>
   );

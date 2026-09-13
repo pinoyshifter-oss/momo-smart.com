@@ -222,10 +222,7 @@ export default async function Home() {
               </>
             ) : (
               <>
-                <p className="bg-brand-soft text-brand inline-flex rounded-full px-3 py-1 text-xs font-bold tracking-[0.12em] uppercase">
-                  Fall 2024 · Term 1
-                </p>
-                <h1 className="text-ink mt-5 text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[3.4rem]">
+                <h1 className="text-ink text-4xl leading-[1.08] font-extrabold tracking-tight sm:text-5xl lg:text-[3.4rem]">
                   The command center for your whole school day.
                 </h1>
                 <p className="text-muted mt-5 max-w-xl text-lg">
@@ -340,7 +337,7 @@ export default async function Home() {
       <footer className="border-line bg-surface border-t">
         <div className="text-muted mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm sm:flex-row">
           <Wordmark href={null} />
-          <p>Smart Momo LMS · Fall 2024 Term 1</p>
+          <p>© 2026 Smart Momo. All rights reserved.</p>
         </div>
       </footer>
     </div>
