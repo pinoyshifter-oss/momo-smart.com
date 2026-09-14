@@ -27,6 +27,10 @@ export default async function StudentLayout({
   // to their own home rather than a page that cannot load.
   if (session.user.role !== "STUDENT") redirect(homeForRole(session.user.role));
 
+  // Accounts a teacher created start on a temporary password.
+  const { mustChangePassword } = await api.account.passwordStatus();
+  if (mustChangePassword) redirect("/account/password");
+
   const [overview, dueSoon, unread] = await Promise.all([
     api.dashboard.studentOverview(),
     api.assignment.dueSoon({ withinDays: 7 }),

@@ -63,7 +63,8 @@ export default async function TeacherLayout({
         <Topbar
           termName={overview.term?.name ?? "Current term"}
           week={overview.term?.week ?? null}
-          teacherName={me.name ?? "Teacher"}
+          teacherName={teacherName || (me.name ?? "Teacher")}
+          email={me.email ?? ""}
           photoUrl={photoUrl}
           unreadNotifications={unread}
         />

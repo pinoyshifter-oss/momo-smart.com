@@ -20,6 +20,23 @@ export const env = createEnv({
     /** UploadThing API token. Optional so the app runs without it; submission uploads need it. */
     UPLOADTHING_TOKEN: z.string().optional(),
     /**
+     * Resend API key and sender, e.g. "Smart Momo <no-reply@yourschool.edu>"
+     * on a domain verified in Resend. Both are needed to email new students
+     * their sign-in details; without them the teacher is shown the details to
+     * pass on instead.
+     */
+    RESEND_API_KEY: z.string().optional(),
+    EMAIL_FROM: z.string().optional(),
+    /**
+     * Testing aid: lets teachers enroll students with any email address
+     * instead of one on the school's email domain. Keep "false" for real
+     * schools.
+     */
+    ALLOW_ANY_STUDENT_EMAIL: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((value) => value === "true"),
+    /**
      * Turns on the public demo: one-click sign-in from /demo, the in-app demo
      * banner and the scheduled reset route. Only enable on a dedicated demo
      * database — a reset wipes every user.
@@ -62,6 +79,9 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     SITE_URL: process.env.SITE_URL,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    ALLOW_ANY_STUDENT_EMAIL: process.env.ALLOW_ANY_STUDENT_EMAIL,
     DEMO_MODE: process.env.DEMO_MODE,
     CRON_SECRET: process.env.CRON_SECRET,
     MESSAGING_JWT_PRIVATE_KEY: process.env.MESSAGING_JWT_PRIVATE_KEY,

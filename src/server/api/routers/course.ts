@@ -7,6 +7,7 @@ import {
   protectedProcedure,
   teacherProcedure,
 } from "~/server/api/trpc";
+import { enrollInSection } from "~/server/lib/enrollment";
 import {
   assertSectionAccess,
   assertTeachesSection,
@@ -379,7 +380,36 @@ export const courseRouter = createTRPCRouter({
       });
     }),
 
-  enrollStudent: adminProcedure
+  /**
+   * Exact lookup by student number or school email, so a teacher can enrol a
+   * student without being able to browse the whole student body.
+   */
+  findStudent: teacherProcedure
+    .input(z.object({ identifier: z.string().trim().min(1).max(120) }))
+    .query(({ ctx, input }) =>
+      ctx.db.studentProfile.findFirst({
+        where: {
+          OR: [
+            {
+              studentNumber: { equals: input.identifier, mode: "insensitive" },
+            },
+            {
+              user: {
+                email: { equals: input.identifier, mode: "insensitive" },
+              },
+            },
+          ],
+        },
+        select: {
+          id: true,
+          studentNumber: true,
+          user: { select: { name: true } },
+        },
+      }),
+    ),
+
+  /** Enrols a student in a section the caller teaches (admins: any). */
+  enrollStudent: teacherProcedure
     .input(
       z.object({
         sectionId: z.string(),
@@ -388,42 +418,23 @@ export const courseRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const section = await ctx.db.section.findUnique({
-        where: { id: input.sectionId },
-        select: {
-          capacity: true,
-          _count: { select: { enrollments: { where: { status: "ACTIVE" } } } },
-        },
-      });
-      if (!section) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Section not found.",
-        });
-      }
-      if (section._count.enrollments >= section.capacity) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "This section is at capacity.",
-        });
-      }
+      await assertTeachesSection(ctx.db, ctx.session.user, input.sectionId);
 
-      return ctx.db.enrollment.upsert({
-        where: {
-          sectionId_studentId: {
-            sectionId: input.sectionId,
-            studentId: input.studentId,
-          },
-        },
-        create: input,
-        update: { status: "ACTIVE", droppedAt: null, seatNo: input.seatNo },
-      });
+      return enrollInSection(
+        ctx.db,
+        input.sectionId,
+        input.studentId,
+        input.seatNo,
+      );
     }),
 
-  dropStudent: adminProcedure
+  /** Drops a student from a section the caller teaches (admins: any). */
+  dropStudent: teacherProcedure
     .input(z.object({ sectionId: z.string(), studentId: z.string() }))
-    .mutation(({ ctx, input }) =>
-      ctx.db.enrollment.update({
+    .mutation(async ({ ctx, input }) => {
+      await assertTeachesSection(ctx.db, ctx.session.user, input.sectionId);
+
+      return ctx.db.enrollment.update({
         where: {
           sectionId_studentId: {
             sectionId: input.sectionId,
@@ -431,6 +442,6 @@ export const courseRouter = createTRPCRouter({
           },
         },
         data: { status: "DROPPED", droppedAt: new Date() },
-      }),
-    ),
+      });
+    }),
 });

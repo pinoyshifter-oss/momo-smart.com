@@ -1,7 +1,9 @@
+import { sectionLabel } from "~/app/_components/format";
 import {
   AlertIcon,
   ArrowRightIcon,
   CalendarIcon,
+  CapIcon,
   MailIcon,
   UsersIcon,
 } from "~/app/_components/icons";
@@ -11,27 +13,53 @@ type Alert = {
   id: string;
   type: string;
   severity: "INFO" | "WARNING" | "CRITICAL";
-  title: string;
   message: string;
-  dueBy: Date | null;
   metadata: unknown;
   currentPercent: number | null;
   currentLetter: string | null;
-  section: { code: string; course: { name: string } } | null;
-  student: { id: string; studentNumber: string; user: { name: string | null } };
+  section: { code: string; course: { code: string } } | null;
+  student: { id: string; user: { name: string | null; image: string | null } };
 };
 
-/** The primary action offered for each kind of alert. */
+/** The one-tap follow-up offered for each kind of alert. */
 const ACTION: Record<
   string,
-  { label: string; icon: React.ComponentType<{ className?: string }> }
+  {
+    label: string;
+    className: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }
 > = {
-  MISSING_WORK: { label: "Contact Parent & Counselor", icon: MailIcon },
-  MISSED_ASSESSMENT: { label: "Schedule Exam Slot", icon: CalendarIcon },
-  GRADE_DROP: { label: "Assign Peer Tutor", icon: UsersIcon },
-  ATTENDANCE: { label: "Contact Parent & Counselor", icon: MailIcon },
-  INACTIVITY: { label: "Message Student", icon: MailIcon },
-  BEHAVIOR: { label: "Log Conference", icon: UsersIcon },
+  MISSING_WORK: {
+    label: "Contact parent & counselor",
+    className: "bg-navy text-white hover:bg-navy-deep",
+    icon: MailIcon,
+  },
+  MISSED_ASSESSMENT: {
+    label: "Schedule exam slot",
+    className: "bg-brand text-white hover:bg-brand/90",
+    icon: CalendarIcon,
+  },
+  GRADE_DROP: {
+    label: "Assign peer tutor",
+    className: "bg-brand-soft text-navy hover:bg-brand-soft/70",
+    icon: CapIcon,
+  },
+  ATTENDANCE: {
+    label: "Contact parent & counselor",
+    className: "bg-navy text-white hover:bg-navy-deep",
+    icon: MailIcon,
+  },
+  INACTIVITY: {
+    label: "Message student",
+    className: "bg-navy text-white hover:bg-navy-deep",
+    icon: MailIcon,
+  },
+  BEHAVIOR: {
+    label: "Log conference",
+    className: "bg-brand-soft text-navy hover:bg-brand-soft/70",
+    icon: UsersIcon,
+  },
 };
 
 function badgeFor(alert: Alert) {
@@ -64,19 +92,15 @@ export function AlertsPanel({
   total: number;
 }) {
   return (
-    <section className="shadow-card overflow-hidden rounded-2xl border border-rose-200 bg-rose-50/40">
-      <div className="flex items-start justify-between gap-3 border-b border-rose-200/70 px-5 py-4">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-600">
-            <AlertIcon className="size-[18px]" />
-          </span>
-          <h2 className="text-[15px] font-bold text-rose-700">
-            Student Attention Alerts
-          </h2>
-        </div>
+    <section className="shadow-card bg-surface overflow-hidden rounded-2xl border border-rose-200">
+      <div className="flex items-center justify-between gap-3 border-b border-rose-200/70 bg-rose-50 px-5 py-4">
+        <h2 className="flex items-center gap-2.5 text-[17px] font-bold text-rose-700">
+          <AlertIcon className="size-5 text-rose-600" />
+          Student Attention
+        </h2>
         {total > 0 && (
-          <span className="shrink-0 rounded-full bg-rose-100 px-2.5 py-1 text-[11px] font-bold text-rose-700">
-            {total} Requires Action
+          <span className="flex size-6 items-center justify-center rounded-full bg-rose-100 text-xs font-bold text-rose-700">
+            {total}
           </span>
         )}
       </div>
@@ -86,86 +110,59 @@ export function AlertsPanel({
           No open alerts. Every student is on track.
         </p>
       ) : (
-        <div className="divide-y divide-rose-200/60">
+        <div className="divide-line divide-y px-4">
           {alerts.map((alert) => {
             const badge = badgeFor(alert);
             const action = ACTION[alert.type] ?? ACTION.MISSING_WORK!;
+            const detail = [
+              alert.section
+                ? sectionLabel(alert.section.course.code, alert.section.code)
+                : "School-wide",
+              alert.currentPercent !== null
+                ? `${alert.currentPercent}%${alert.currentLetter ? ` (${alert.currentLetter})` : ""}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" • ");
 
             return (
-              <article key={alert.id} className="px-5 py-4">
-                <div className="flex items-start gap-3">
-                  <Avatar name={alert.student.user.name} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-ink truncate text-sm font-bold">
-                          {alert.student.user.name}
-                        </p>
-                        <p className="text-muted text-xs leading-snug">
-                          {alert.section
-                            ? `${alert.section.course.name} — ${alert.section.code}`
-                            : "School-wide"}
-                          {alert.currentPercent !== null && (
-                            <>
-                              {" • Current grade: "}
-                              <span className="text-ink font-semibold">
-                                {alert.currentPercent}%
-                                {alert.currentLetter
-                                  ? ` (${alert.currentLetter})`
-                                  : ""}
-                              </span>
-                            </>
-                          )}
-                        </p>
-                      </div>
-                      <Pill tone={badge.tone}>{badge.label}</Pill>
-                    </div>
-
-                    <p className="mt-2.5 rounded-xl bg-rose-100/70 px-3 py-2 text-xs leading-relaxed text-rose-900">
-                      <span className="font-bold">
-                        {alert.severity === "CRITICAL" ? "Alert: " : "Notice: "}
-                      </span>
-                      {alert.message}
-                      {alert.dueBy &&
-                        ` Window closes ${alert.dueBy.toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "short",
-                            day: "numeric",
-                          },
-                        )}.`}
-                    </p>
-
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <button
-                        type="button"
-                        className="bg-navy hover:bg-navy-deep inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white transition"
-                      >
-                        <action.icon className="size-3.5" />
-                        {action.label}
-                      </button>
-                      <button
-                        type="button"
-                        className="border-line bg-surface text-ink hover:bg-canvas rounded-lg border px-3 py-2 text-xs font-semibold transition"
-                      >
-                        Profile
-                      </button>
-                    </div>
-                  </div>
+              <article
+                key={alert.id}
+                title={alert.message}
+                className="flex items-center gap-3 py-4"
+              >
+                <Avatar
+                  name={alert.student.user.name}
+                  src={alert.student.user.image}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-ink text-sm leading-snug font-bold">
+                    {alert.student.user.name}
+                  </p>
+                  <p className="text-muted text-xs leading-snug">{detail}</p>
                 </div>
+                <Pill tone={badge.tone}>{badge.label}</Pill>
+                <button
+                  type="button"
+                  aria-label={`${action.label} for ${alert.student.user.name ?? "student"}`}
+                  title={action.label}
+                  className={`flex size-8 shrink-0 items-center justify-center rounded-lg transition ${action.className}`}
+                >
+                  <action.icon className="size-4" />
+                </button>
               </article>
             );
           })}
         </div>
       )}
 
-      <div className="border-t border-rose-200/70 px-5 py-3">
+      <div className="border-line bg-brand-soft/60 border-t px-5 py-3 text-center">
         <button
           type="button"
-          className="text-brand inline-flex items-center gap-1 text-xs font-bold hover:underline"
+          className="text-brand inline-flex items-center gap-1.5 text-sm font-bold hover:underline"
         >
-          Launch Early Intervention Portal (MomoCare)
-          <ArrowRightIcon className="size-3.5" />
+          Intervention Portal
+          <ArrowRightIcon className="size-4" />
         </button>
       </div>
     </section>

@@ -51,10 +51,13 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
+      // Google Search wants a raster icon sized in multiples of 48px.
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
       // Fallback for browsers without SVG favicon support.
       { url: "/favicon.ico", sizes: "any" },
     ],
-    apple: "/icon.svg",
+    // iOS ignores SVG touch icons.
+    apple: { url: "/apple-icon.png", sizes: "180x180" },
   },
 };
 

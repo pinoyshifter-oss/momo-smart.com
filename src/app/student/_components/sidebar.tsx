@@ -72,11 +72,11 @@ export function Sidebar({
       <div className="border-line border-t px-4 py-4">
         <div className="space-y-1">
           <Link
-            href="/student/settings"
+            href="/account/password"
             className="text-muted hover:bg-canvas hover:text-ink flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition"
           >
             <SettingsIcon className="size-[18px]" />
-            Settings
+            Change Password
           </Link>
           <Link
             href="/student/help"

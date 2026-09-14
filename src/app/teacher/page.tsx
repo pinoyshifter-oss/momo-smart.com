@@ -1,7 +1,11 @@
+import Link from "next/link";
+
 import { DownloadIcon, MegaphoneIcon } from "~/app/_components/icons";
+import { studentEmailRule } from "~/server/lib/credentials";
 import { api } from "~/trpc/server";
 import { AlertsPanel } from "./_components/alerts-panel";
 import { DailyRoster } from "./_components/daily-roster";
+import { EnrollStudentDialog } from "./_components/enroll-dialog";
 import { GradingQueue } from "./_components/grading-queue";
 import { OfficeHours } from "./_components/office-hours";
 import { Performance } from "./_components/performance";
@@ -40,9 +44,7 @@ export default async function TeacherDashboard() {
     api.calendar.agenda({ from: now, to: in14Days }),
   ]);
 
-  const pendingPeriod = daySchedule.periods.find(
-    (period) => period.state !== "SUBMITTED",
-  );
+  const live = daySchedule.periods.some((p) => p.state === "IN_SESSION");
   const surname = me.name?.split(" ").slice(-1)[0] ?? "there";
 
   const deadlines = agenda.events
@@ -55,79 +57,72 @@ export default async function TeacherDashboard() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-ink text-3xl font-extrabold tracking-tight">
+            <h1 className="text-ink text-3xl font-extrabold tracking-tight sm:text-[34px]">
               Teacher Command Center
             </h1>
-            {daySchedule.periods.some((p) => p.state === "IN_SESSION") && (
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-bold text-emerald-700">
-                Live session
+            {live && (
+              <span className="border-brand/20 bg-brand-soft text-brand rounded-full border px-2.5 py-0.5 text-xs font-bold">
+                Live
               </span>
             )}
           </div>
-          <p className="text-muted mt-2 max-w-2xl text-sm">
+          <p className="text-muted mt-1.5 text-sm">
             Welcome back, {me.title ? `${me.title} ` : ""}
-            {surname}. You have {overview.ungradedCount} item
-            {overview.ungradedCount === 1 ? "" : "s"} awaiting evaluation
-            {pendingPeriod
-              ? ` and Period ${pendingPeriod.period} attendance pending.`
-              : " and attendance is complete for today."}
+            {surname}
           </p>
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <button
-            type="button"
-            className="border-line bg-surface text-ink hover:bg-canvas inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition"
+          <Link
+            href="/teacher/reports"
+            className="border-line bg-surface text-ink hover:bg-canvas inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition"
           >
             <DownloadIcon className="size-4" />
-            Export Reports
-          </button>
+            Export
+          </Link>
           <button
             type="button"
-            className="bg-navy hover:bg-navy-deep inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition"
+            className="bg-navy hover:bg-navy-deep inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition"
           >
             <MegaphoneIcon className="size-4" />
-            Broadcast Announcement
+            Broadcast
           </button>
+          <EnrollStudentDialog
+            sections={performance.map((section) => ({
+              id: section.sectionId,
+              label: `${section.course.name} — ${section.sectionCode} (Per. ${section.period})`,
+            }))}
+            emailRule={studentEmailRule(me.email)}
+            className="bg-brand hover:bg-brand/90 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition"
+          />
         </div>
       </div>
 
       <StatCards
         totalEnrolled={overview.totalEnrolled}
-        sectionCount={overview.sectionCount}
         ungradedCount={overview.ungradedCount}
-        ungradedDueWithin24h={overview.ungradedDueWithin24h}
         attendanceRate={overview.attendanceRate}
         attendanceDelta={attendanceToday.deltaFromPreviousDay}
-        excusedToday={overview.excusedToday}
         atRiskCount={overview.atRiskCount}
       />
 
-      <DailyRoster
-        date={daySchedule.date}
-        rotation={daySchedule.rotation}
-        periods={daySchedule.periods}
-      />
+      <DailyRoster periods={daySchedule.periods} />
 
-      {/* Queue + alerts */}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
-        <GradingQueue
-          items={queue.items}
-          total={queueSummary.total}
-          sectionCount={queueSummary.sections}
-        />
-        <AlertsPanel alerts={alerts.items} total={alerts.total} />
-      </div>
-
-      {/* Performance + office hours */}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
-        <Performance sections={performance} />
-        <OfficeHours
-          officeHours={officeHours}
-          deadlines={deadlines}
-          pacing={pacing}
-          termName={overview.term?.name.split("–").pop()?.trim() ?? "Term"}
-        />
+      {/* Work queue and performance on the left; people and schedule on the right. */}
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-8">
+          <GradingQueue items={queue.items} total={queueSummary.total} />
+          <Performance sections={performance} />
+        </div>
+        <div className="min-w-0 space-y-6">
+          <AlertsPanel alerts={alerts.items} total={alerts.total} />
+          <OfficeHours
+            officeHours={officeHours}
+            deadlines={deadlines}
+            pacing={pacing}
+            termName={overview.term?.name.split("–").pop()?.trim() ?? "Term"}
+          />
+        </div>
       </div>
     </div>
   );

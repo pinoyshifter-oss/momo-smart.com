@@ -9,6 +9,7 @@ import {
   SUBJECT_SUGGESTIONS,
   TEACHER_TITLES,
 } from "../registration";
+import { MAX_UPLOAD_BYTES, toPhotoDataUrl } from "~/app/_components/photo";
 import { BACK, INPUT, LABEL, PRIMARY } from "./styles";
 
 export type ProfileValues = {
@@ -20,36 +21,6 @@ export type ProfileValues = {
   bio: string;
   photo: string;
 };
-
-const PHOTO_SIZE = 320;
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
-
-/**
- * Centre-crops the image to a square and re-encodes it as a small JPEG, so
- * the stored photo is a few dozen KB whatever the camera produced.
- */
-async function toPhotoDataUrl(file: File): Promise<string> {
-  const bitmap = await createImageBitmap(file);
-  const side = Math.min(bitmap.width, bitmap.height);
-  const canvas = document.createElement("canvas");
-  canvas.width = PHOTO_SIZE;
-  canvas.height = PHOTO_SIZE;
-  const context = canvas.getContext("2d");
-  if (!context) throw new Error("Canvas is unavailable.");
-  context.drawImage(
-    bitmap,
-    (bitmap.width - side) / 2,
-    (bitmap.height - side) / 2,
-    side,
-    side,
-    0,
-    0,
-    PHOTO_SIZE,
-    PHOTO_SIZE,
-  );
-  bitmap.close();
-  return canvas.toDataURL("image/jpeg", 0.85);
-}
 
 /** Step 2: photo, name, subject and the optional details. */
 export function ProfileStep({

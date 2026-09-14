@@ -1,3 +1,4 @@
+import { accountRouter } from "~/server/api/routers/account";
 import { alertRouter } from "~/server/api/routers/alert";
 import { announcementRouter } from "~/server/api/routers/announcement";
 import { assessmentRouter } from "~/server/api/routers/assessment";
@@ -11,6 +12,8 @@ import { lessonRouter } from "~/server/api/routers/lesson";
 import { messagingRouter } from "~/server/api/routers/messaging";
 import { notificationRouter } from "~/server/api/routers/notification";
 import { organizationRouter } from "~/server/api/routers/organization";
+import { profileRouter } from "~/server/api/routers/profile";
+import { sectionRouter } from "~/server/api/routers/section";
 import { submissionRouter } from "~/server/api/routers/submission";
 import { userRouter } from "~/server/api/routers/user";
 import { waitlistRouter } from "~/server/api/routers/waitlist";
@@ -20,7 +23,10 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  * The primary router for the Smart Momo LMS API.
  *
  *   user          identity, profiles, roster search
+ *   account       password changes, teacher-created student accounts
+ *   profile       teacher profile settings and sign-in email
  *   course        sections, rosters, syllabus, enrolment
+ *   section       teachers adding, editing and deleting their own sections
  *   lesson        lesson delivery, video progress, notes
  *   assignment    assignment + rubric authoring, "due soon"
  *   submission    student submissions and attachments
@@ -40,7 +46,10 @@ export const appRouter = createTRPCRouter({
   waitlist: waitlistRouter,
   organization: organizationRouter,
   user: userRouter,
+  account: accountRouter,
+  profile: profileRouter,
   course: courseRouter,
+  section: sectionRouter,
   lesson: lessonRouter,
   assignment: assignmentRouter,
   submission: submissionRouter,

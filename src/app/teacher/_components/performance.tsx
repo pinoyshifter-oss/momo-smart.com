@@ -1,9 +1,11 @@
+import Link from "next/link";
+
 import {
   ChevronRightIcon,
   MegaphoneIcon,
   TrendUpIcon,
 } from "~/app/_components/icons";
-import { Card, CardHeader, EmptyState, Pill } from "~/app/_components/ui";
+import { Card, EmptyState } from "~/app/_components/ui";
 
 type SectionPerformance = {
   sectionId: string;
@@ -17,10 +19,27 @@ type SectionPerformance = {
   currentUnit: { order: number; title: string } | null;
 };
 
-/** Accent per card, echoing the coloured rules in the design. */
-const ACCENTS = ["bg-teal-500", "bg-brand", "bg-amber-500", "bg-violet-500"];
+/** Colour set per card: the top rule, the student pill and the average label. */
+const ACCENTS = [
+  {
+    rule: "bg-teal-600",
+    pill: "bg-teal-50 text-teal-700",
+    text: "text-teal-700",
+  },
+  { rule: "bg-navy", pill: "bg-brand-soft text-brand", text: "text-brand" },
+  {
+    rule: "bg-amber-600",
+    pill: "bg-amber-50 text-amber-700",
+    text: "text-amber-700",
+  },
+  {
+    rule: "bg-violet-600",
+    pill: "bg-violet-50 text-violet-700",
+    text: "text-violet-700",
+  },
+];
 
-function letterFor(percent: number): string {
+export function letterFor(percent: number): string {
   if (percent >= 97) return "A+";
   if (percent >= 93) return "A";
   if (percent >= 90) return "A-";
@@ -36,25 +55,27 @@ function letterFor(percent: number): string {
 
 export function Performance({ sections }: { sections: SectionPerformance[] }) {
   return (
-    <Card>
-      <CardHeader
-        icon={<TrendUpIcon className="size-[18px]" />}
-        title="Course Performance & Grade Distribution"
-        action={
-          <button
-            type="button"
-            className="border-line bg-surface text-ink hover:bg-canvas inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition"
-          >
-            <MegaphoneIcon className="size-3.5" />
-            Post Announcement
-          </button>
-        }
-      />
+    <section>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-ink flex items-center gap-2.5 text-[17px] font-bold">
+          <TrendUpIcon className="text-navy size-5" />
+          Course Performance
+        </h2>
+        <button
+          type="button"
+          className="border-line bg-surface text-navy hover:bg-canvas inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition"
+        >
+          <MegaphoneIcon className="size-3.5" />
+          Announcement
+        </button>
+      </div>
 
       {sections.length === 0 ? (
-        <EmptyState>No sections assigned this term.</EmptyState>
+        <Card className="mt-4">
+          <EmptyState>No sections assigned this term.</EmptyState>
+        </Card>
       ) : (
-        <div className="grid gap-4 p-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {sections.map((section, index) => (
             <SectionCard
               key={section.sectionId}
@@ -64,7 +85,7 @@ export function Performance({ sections }: { sections: SectionPerformance[] }) {
           ))}
         </div>
       )}
-    </Card>
+    </section>
   );
 }
 
@@ -73,90 +94,103 @@ function SectionCard({
   accent,
 }: {
   section: SectionPerformance;
-  accent: string;
+  accent: (typeof ACCENTS)[number];
 }) {
   const bars = [
-    { label: "A", count: section.distribution.A, className: "bg-teal-500" },
-    { label: "B", count: section.distribution.B, className: "bg-brand" },
-    { label: "C", count: section.distribution.C, className: "bg-amber-500" },
-    { label: "D/F", count: section.distribution.DF, className: "bg-rose-500" },
+    { label: "A", count: section.distribution.A, className: "bg-teal-600" },
+    { label: "B", count: section.distribution.B, className: "bg-blue-600" },
+    { label: "C", count: section.distribution.C, className: "bg-amber-600" },
+    { label: "D/F", count: section.distribution.DF, className: "bg-red-600" },
   ];
   const peak = Math.max(1, ...bars.map((bar) => bar.count));
 
   return (
-    <article className="border-line bg-canvas relative overflow-hidden rounded-2xl border p-4">
-      <span
-        aria-hidden="true"
-        className={`absolute inset-x-0 top-0 h-1 ${accent}`}
-      />
+    <article className="border-line bg-surface shadow-card flex flex-col overflow-hidden rounded-2xl border">
+      <span aria-hidden="true" className={`h-1.5 ${accent.rule}`} />
 
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-muted text-[11px] font-bold tracking-wide uppercase">
-          {section.sectionCode} • Per. {section.period}
-        </p>
-        <Pill tone="slate">{section.studentCount} Students</Pill>
-      </div>
-
-      <h3 className="text-ink mt-2 text-base font-extrabold">
-        {section.course.name}
-      </h3>
-
-      <p className="mt-3 flex items-end gap-2">
-        <span className="text-ink text-4xl font-extrabold tracking-tight">
-          {section.classAverage === null ? "—" : `${section.classAverage}%`}
-        </span>
-        <span className="text-muted pb-1 text-xs font-semibold">
-          Class average
-          {section.classAverage !== null &&
-            ` (${letterFor(section.classAverage)})`}
-        </span>
-      </p>
-
-      <div className="mt-4">
-        <p className="text-muted text-[10px] font-bold tracking-wider uppercase">
-          Grade distribution
-        </p>
-        <div className="mt-2 flex h-24 items-stretch gap-3">
-          {bars.map((bar) => (
-            <div
-              key={bar.label}
-              className="flex flex-1 flex-col items-center gap-1"
-            >
-              <span className="text-ink text-xs font-bold">{bar.count}</span>
-              {/* The track gives the bar a definite height to size against. */}
-              <div className="flex w-full flex-1 items-end">
-                <div
-                  className={`w-full rounded-t-md ${bar.className}`}
-                  style={{
-                    height: `${Math.max(6, (bar.count / peak) * 100)}%`,
-                  }}
-                  role="presentation"
-                />
-              </div>
-              <span className="text-muted text-[11px] font-semibold">
-                {bar.label}
-              </span>
-            </div>
-          ))}
+      <div className="flex-1 p-4">
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-muted pt-1 text-[10px] font-bold tracking-[0.12em] uppercase">
+            {section.course.level} • Per. {section.period}
+          </p>
+          <span
+            className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${accent.pill}`}
+          >
+            {section.studentCount} Students
+          </span>
         </div>
-        {section.gradedStudents === 0 && (
-          <p className="text-muted mt-2 text-[11px]">No released grades yet.</p>
-        )}
+
+        <h3 className="text-ink mt-2 text-lg leading-snug font-extrabold">
+          {section.course.name} {section.sectionCode}
+        </h3>
+
+        <p className="mt-3 flex items-end gap-2">
+          <span className="text-ink text-4xl font-extrabold tracking-tight">
+            {section.classAverage === null ? "—" : `${section.classAverage}%`}
+          </span>
+          <span
+            className={`pb-1 text-[11px] leading-tight font-semibold ${accent.text}`}
+          >
+            Class Average
+            {section.classAverage !== null && (
+              <>
+                <br />({letterFor(section.classAverage)})
+              </>
+            )}
+          </span>
+        </p>
+
+        <div className="border-line mt-4 border-t pt-3">
+          <p className="text-muted text-[10px] font-semibold tracking-wider uppercase">
+            Grade distribution
+          </p>
+          <div className="mt-2 flex h-24 items-stretch gap-3">
+            {bars.map((bar) => (
+              <div
+                key={bar.label}
+                className="flex flex-1 flex-col items-center gap-1"
+              >
+                {/* The track gives the bar a definite height to size against. */}
+                <div className="flex w-full flex-1 flex-col items-center justify-end gap-1">
+                  <span className="text-ink text-[11px] font-semibold">
+                    {bar.count}
+                  </span>
+                  <div
+                    className={`w-full rounded-t ${bar.className}`}
+                    style={{
+                      height: `${Math.max(6, (bar.count / peak) * 70)}%`,
+                    }}
+                    role="presentation"
+                  />
+                </div>
+                <span className="text-muted text-[11px] font-semibold">
+                  {bar.label}
+                </span>
+              </div>
+            ))}
+          </div>
+          {section.gradedStudents === 0 && (
+            <p className="text-muted mt-2 text-[11px]">
+              No released grades yet.
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="border-line mt-4 flex items-center justify-between gap-2 border-t pt-3">
-        <p className="text-muted min-w-0 truncate text-xs">
-          {section.currentUnit
-            ? `Syllabus: ${section.currentUnit.title}`
-            : "Syllabus: not started"}
+      <div className="border-line flex items-center justify-between gap-2 border-t px-4 py-3">
+        <p
+          className="text-muted min-w-0 truncate text-xs"
+          title={section.currentUnit?.title}
+        >
+          {section.currentUnit?.title ?? "No unit in progress"}
         </p>
-        <button
-          type="button"
+        <Link
+          href={`/teacher/enroll?section=${section.sectionId}`}
           className="text-brand inline-flex shrink-0 items-center gap-0.5 text-xs font-bold hover:underline"
         >
           Open Roster
           <ChevronRightIcon className="size-3.5" />
-        </button>
+        </Link>
       </div>
     </article>
   );

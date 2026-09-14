@@ -1,5 +1,10 @@
 /** Presentation helpers shared by the teacher and student screens. */
 
+/** Compact section label for pills: "AP-BIO" + "Sec 2" → "AP-BIO 2". */
+export function sectionLabel(courseCode: string, sectionCode: string): string {
+  return `${courseCode} ${sectionCode.replace(/^sec(tion)?\s*/i, "")}`;
+}
+
 /** "08:15" → "08:15 AM" */
 export function clock(time: string | null): string {
   if (!time) return "—";
@@ -37,7 +42,12 @@ export function timeAgo(date: Date | null | undefined): string {
 /** Initials for the avatar fallback. */
 export function initials(name: string | null | undefined): string {
   if (!name) return "?";
-  const parts = name.trim().split(/\s+/);
+  // "Dr. Aris Chen" → "AC": honorifics aren't part of someone's initials.
+  const parts = name
+    .trim()
+    .split(/\s+/)
+    .filter((part) => !/^(dr|mr|mrs|ms|mx|prof)\.?$/i.test(part));
+  if (parts.length === 0) return "?";
   const first = parts[0]?.[0] ?? "";
   const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
   return (first + last).toUpperCase();

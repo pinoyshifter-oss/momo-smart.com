@@ -958,3 +958,145 @@ export function BookOpenIcon({ className = base }: IconProps) {
     />
   );
 }
+
+export function UserPlusIcon({ className = base }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="9.5" cy="8.5" r="3.2" stroke="currentColor" strokeWidth="1.7" />
+      <path
+        d="M4 19c0-2.8 2.5-4.5 5.5-4.5S15 16.2 15 19M18.5 8v6M15.5 11h6"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function WrenchIcon({ className = base }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function IdCardIcon({ className = base }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <rect
+        x="3.5"
+        y="5.5"
+        width="17"
+        height="13"
+        rx="2.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+      <circle cx="9" cy="11" r="1.8" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M6.5 15.5c.5-1.2 1.4-1.8 2.5-1.8s2 .6 2.5 1.8M14 10h4M14 13.5h3"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function AlarmIcon({ className = base }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="13" r="7" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M12 9.5V13l2.2 1.5M4.5 5.5 7 3.5M19.5 5.5 17 3.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function ChecklistIcon({ className = base }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M11 7h9M11 12h9M11 17h9M4 7l1.3 1.3L7.8 6M4 12l1.3 1.3L7.8 11M4 17l1.3 1.3L7.8 16"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function UserIcon({ className = base }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="8.5" r="3.5" stroke="currentColor" strokeWidth="1.7" />
+      <path
+        d="M5 20c0-3.6 3.1-5.8 7-5.8s7 2.2 7 5.8"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function LogoutIcon({ className = base }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M14 4.5h3.5a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H14M10 16l-4-4 4-4M6 12h9.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

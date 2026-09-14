@@ -11,7 +11,7 @@ import {
   Pill,
 } from "~/app/_components/ui";
 
-export const metadata: Metadata = { title: "Grades" };
+export const metadata: Metadata = { title: "Class Record" };
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{ section?: string }>;
@@ -78,7 +78,7 @@ export default async function GradesPage({
   if (sections.length === 0) {
     return (
       <div className="mx-auto max-w-[1400px] space-y-6">
-        <PageHeader title="Grades" />
+        <PageHeader title="Class Record" />
         <Card>
           <EmptyState>No sections are assigned to you this term.</EmptyState>
         </Card>
@@ -103,7 +103,7 @@ export default async function GradesPage({
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
       <PageHeader
-        title="Grades"
+        title="Class Record"
         subtitle={`${active.course.name} — ${active.code} • ${gradebook.rows.length} students • ${gradebook.assignments.length} published assignments${average !== null ? ` • class average ${average}%` : ""}.`}
         action={
           <button

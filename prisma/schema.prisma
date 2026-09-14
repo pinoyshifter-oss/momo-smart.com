@@ -47,6 +47,9 @@ model User {
   role          UserRole  @default(STUDENT)
   /// bcrypt hash for email + password sign-in; null for SSO-only accounts.
   passwordHash  String?
+  /// Set on accounts created with a temporary password (students enrolled by
+  /// a teacher); cleared once the owner chooses their own.
+  mustChangePassword Boolean @default(false)
   /// Honorific shown in the UI ("Dr.", "Ms.", "Mr.").
   title         String?
   isActive      Boolean   @default(true)
