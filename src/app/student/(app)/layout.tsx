@@ -22,7 +22,7 @@ export default async function StudentLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
-  if (!session?.user) redirect("/login");
+  if (!session?.user) redirect("/student/login");
   // Every student procedure is keyed by the student profile, so staff are sent
   // to their own home rather than a page that cannot load.
   if (session.user.role !== "STUDENT") redirect(homeForRole(session.user.role));

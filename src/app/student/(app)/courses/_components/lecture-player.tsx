@@ -15,7 +15,7 @@ import {
   VolumeIcon,
   VolumeOffIcon,
 } from "~/app/_components/icons";
-import { mmss } from "~/app/student/_components/format";
+import { mmss } from "~/app/student/(app)/_components/format";
 import { addLessonNote, saveLessonProgress } from "../actions";
 
 type Marker = { id: string; label: string; positionSeconds: number };

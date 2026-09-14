@@ -13,7 +13,7 @@ import {
   courseTone,
   points,
   teacherFullName,
-} from "~/app/student/_components/format";
+} from "~/app/student/(app)/_components/format";
 import { categoryTone, type Subject } from "./shared";
 
 /** One enrolled subject: running grade and its weighted category breakdown. */

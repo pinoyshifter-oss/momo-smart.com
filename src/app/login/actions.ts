@@ -39,6 +39,13 @@ export async function login(
     select: { role: true },
   });
 
+  // The student portal (/student/login) signs in students only. Anyone else
+  // gets the same message as a wrong password, so the page reveals nothing
+  // about which emails belong to staff.
+  if (formData.get("audience") === "student" && account?.role !== "STUDENT") {
+    return { error: "Incorrect email or password." };
+  }
+
   try {
     await signIn("credentials", {
       email: parsed.data.email,

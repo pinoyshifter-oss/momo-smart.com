@@ -13,7 +13,7 @@ import {
   points,
   shortDate,
   teacherFullName,
-} from "~/app/student/_components/format";
+} from "~/app/student/(app)/_components/format";
 import { sameDay, type OfficeHours, type ScheduleEntry } from "./shared";
 
 const HOUR_MS = 3_600_000;

@@ -9,7 +9,7 @@ import {
   points,
   shortDate,
   type DueUrgency,
-} from "~/app/student/_components/format";
+} from "~/app/student/(app)/_components/format";
 import { starsAvailable } from "~/server/lib/stars";
 import { dueDescription, ONLINE_FORMATS, type MyAssignment } from "./shared";
 

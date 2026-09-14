@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { CheckIcon, StarIcon } from "~/app/_components/icons";
 import { Card, EmptyState } from "~/app/_components/ui";
-import { points } from "~/app/student/_components/format";
+import { points } from "~/app/student/(app)/_components/format";
 import {
   calendarHref,
   KIND_STYLE,

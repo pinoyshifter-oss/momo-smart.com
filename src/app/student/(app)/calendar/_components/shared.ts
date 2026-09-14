@@ -1,5 +1,5 @@
 import { clockOf } from "~/app/_components/format";
-import { shortDate } from "~/app/student/_components/format";
+import { shortDate } from "~/app/student/(app)/_components/format";
 import { addDays, startOfDay } from "~/server/lib/dates";
 import type { RouterOutputs } from "~/trpc/react";
 

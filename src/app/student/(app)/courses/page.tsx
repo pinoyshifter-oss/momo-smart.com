@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 
 import { ChevronRightIcon } from "~/app/_components/icons";
 import { Card, EmptyState } from "~/app/_components/ui";
-import { teacherFullName } from "~/app/student/_components/format";
+import { teacherFullName } from "~/app/student/(app)/_components/format";
 import { api } from "~/trpc/server";
 import type { RouterOutputs } from "~/trpc/react";
 import { InstructorCard } from "./_components/instructor-card";

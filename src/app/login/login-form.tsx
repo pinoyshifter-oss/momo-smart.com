@@ -8,7 +8,15 @@ import { login, type LoginState } from "./actions";
 
 const initialState: LoginState = { error: null };
 
-export function LoginForm() {
+/**
+ * Email + password sign-in. The student portal (`audience="student"`) only
+ * accepts student accounts and leaves out teacher registration.
+ */
+export function LoginForm({
+  audience = "everyone",
+}: {
+  audience?: "everyone" | "student";
+}) {
   const [state, formAction, pending] = useActionState(login, initialState);
   // Controlled so a failed attempt keeps the email; React resets uncontrolled
   // fields once a form action finishes.
@@ -16,18 +24,22 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const emailId = useId();
   const passwordId = useId();
+  const student = audience === "student";
 
   return (
     <div className="w-full max-w-md">
       <h1 className="text-3xl font-extrabold tracking-tight text-ink">
-        Welcome back
+        {student ? "Student sign in" : "Welcome back"}
       </h1>
       <p className="mt-2 text-[15px] text-muted">
-        Sign in with your school account to reach your courses, grading queue and
-        assessments.
+        {student
+          ? "Use the email and password from your welcome email. Signing in for the first time? Enter your temporary password — you'll choose your own right after."
+          : "Sign in with your school account to reach your courses, grading queue and assessments."}
       </p>
 
       <form action={formAction} className="mt-8 space-y-4">
+        {student && <input type="hidden" name="audience" value="student" />}
+
         {state.error && (
           <p
             role="alert"
@@ -43,7 +55,7 @@ export function LoginForm() {
             htmlFor={emailId}
             className="mb-1.5 block text-sm font-semibold text-ink"
           >
-            School email
+            {student ? "Email" : "School email"}
           </label>
           <input
             id={emailId}
@@ -53,7 +65,7 @@ export function LoginForm() {
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@momosmart.edu"
+            placeholder={student ? "you@example.com" : "you@momosmart.edu"}
             className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-[15px] text-ink outline-none transition placeholder:text-muted/70 focus:border-brand focus:ring-4 focus:ring-brand/12"
           />
         </div>
@@ -99,12 +111,18 @@ export function LoginForm() {
         </p>
       </form>
 
-      <Link
-        href="/register"
-        className="border-line bg-surface text-ink hover:bg-canvas mt-6 flex w-full items-center justify-center rounded-xl border px-4 py-3 text-[15px] font-semibold transition"
-      >
-        New teacher? Register here
-      </Link>
+      {student ? (
+        <p className="mt-6 text-center text-sm text-muted">
+          Can&apos;t sign in? Ask your teacher to check your account.
+        </p>
+      ) : (
+        <Link
+          href="/register"
+          className="border-line bg-surface text-ink hover:bg-canvas mt-6 flex w-full items-center justify-center rounded-xl border px-4 py-3 text-[15px] font-semibold transition"
+        >
+          New teacher? Register here
+        </Link>
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { humanise } from "~/app/_components/format";
 import { LockIcon, TimerIcon } from "~/app/_components/icons";
 import { Card, Pill } from "~/app/_components/ui";
-import { teacherFullName } from "~/app/student/_components/format";
+import { teacherFullName } from "~/app/student/(app)/_components/format";
 import type { RouterOutputs } from "~/trpc/react";
 import { MarkComplete } from "./mark-complete";
 

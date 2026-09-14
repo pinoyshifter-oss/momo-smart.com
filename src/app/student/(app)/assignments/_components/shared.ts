@@ -4,7 +4,7 @@ import {
   dueLabel,
   points,
   shortDate,
-} from "~/app/student/_components/format";
+} from "~/app/student/(app)/_components/format";
 import { starsAvailable } from "~/server/lib/stars";
 import type { RouterOutputs } from "~/trpc/react";
 import type { PanelTask } from "./submit-panel";

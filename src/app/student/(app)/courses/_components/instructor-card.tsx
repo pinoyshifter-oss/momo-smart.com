@@ -6,7 +6,7 @@ import { Avatar, Card } from "~/app/_components/ui";
 import {
   teacherFullName,
   teacherShortName,
-} from "~/app/student/_components/format";
+} from "~/app/student/(app)/_components/format";
 import { dayOfWeekOf } from "~/server/lib/dates";
 import type { RouterOutputs } from "~/trpc/react";
 

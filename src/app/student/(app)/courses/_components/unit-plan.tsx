@@ -16,7 +16,7 @@ import {
   mmss,
   points,
   shortDate,
-} from "~/app/student/_components/format";
+} from "~/app/student/(app)/_components/format";
 import type { RouterOutputs } from "~/trpc/react";
 
 type Lesson = RouterOutputs["lesson"]["get"];

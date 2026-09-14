@@ -4,7 +4,7 @@ import {
   points,
   shortDate,
   teacherFullName,
-} from "~/app/student/_components/format";
+} from "~/app/student/(app)/_components/format";
 import { starsFor } from "~/server/lib/stars";
 import type { MyAssignment } from "./shared";
 

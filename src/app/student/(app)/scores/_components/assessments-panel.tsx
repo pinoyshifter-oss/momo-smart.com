@@ -7,7 +7,7 @@ import {
   courseTone,
   points,
   shortDate,
-} from "~/app/student/_components/format";
+} from "~/app/student/(app)/_components/format";
 import { categoryTone, scoresHref, type Subject } from "./shared";
 
 /** Released scores for the selected subject, filterable by grade category. */

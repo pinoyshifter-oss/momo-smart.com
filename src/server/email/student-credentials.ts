@@ -38,7 +38,8 @@ export function studentCredentialsEmail({
   sectionName,
   schoolName,
 }: StudentCredentials) {
-  const loginUrl = new URL("/login", SITE_URL).toString();
+  // The student-only sign-in page, without the teacher registration link.
+  const loginUrl = new URL("/student/login", SITE_URL).toString();
   const firstName = studentName.split(" ")[0] ?? studentName;
   const school = schoolName ?? SITE_NAME;
   const subject = `Welcome to ${SITE_NAME} — your student ID and sign-in details`;
@@ -117,7 +118,7 @@ export function studentCredentialsEmail({
 
             <h2 style="margin:28px 0 8px;color:#0f172a;font-size:15px;">How to sign in</h2>
             <table role="presentation" cellpadding="0" cellspacing="0">
-              ${step(1, `Go to <a href="${escape(loginUrl)}" style="color:#2563eb;font-weight:600;">${escape(loginUrl.replace(/^https?:\/\//, ""))}</a>`)}
+              ${step(1, `Go to <a href="${escape(loginUrl)}" style="color:#2563eb;font-weight:600;word-break:break-all;">${escape(loginUrl)}</a>`)}
               ${step(2, "Enter your school email and the temporary password above.")}
               ${step(3, "Choose your own password (at least 8 characters). The temporary one stops working after that.")}
             </table>

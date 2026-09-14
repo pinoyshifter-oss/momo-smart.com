@@ -1,6 +1,6 @@
 import { ChartIcon, CheckCircleIcon, StarIcon } from "~/app/_components/icons";
 import { Card, Pill } from "~/app/_components/ui";
-import { points } from "~/app/student/_components/format";
+import { points } from "~/app/student/(app)/_components/format";
 import { honorsFor, type MyScores } from "./shared";
 
 /** The four headline figures above the subject list. */
