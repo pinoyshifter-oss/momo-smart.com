@@ -14,6 +14,17 @@ function messageOf(error: TRPCError): string {
   return error.message;
 }
 
+/**
+ * The form message for any failed call. Unexpected errors (database, network)
+ * are logged and reported instead of rethrown: a rethrown error is hidden in
+ * production, leaving the form with no message at all.
+ */
+function failure(action: string, error: unknown): string {
+  if (error instanceof TRPCError) return messageOf(error);
+  console.error(`${action} failed`, error);
+  return "Something went wrong on our side, so nothing was saved. Please try again.";
+}
+
 export type CreateStudentResult = Awaited<
   ReturnType<typeof api.account.createStudent>
 >;
@@ -47,8 +58,7 @@ export async function createStudent(
     revalidatePath("/teacher", "layout");
     return { result };
   } catch (error) {
-    if (error instanceof TRPCError) return { error: messageOf(error) };
-    throw error;
+    return { error: failure("createStudent", error) };
   }
 }
 
@@ -80,8 +90,7 @@ export async function enrollStudent(
     revalidatePath("/teacher", "layout");
     return { enrolled: student.user.name ?? student.studentNumber };
   } catch (error) {
-    if (error instanceof TRPCError) return { error: error.message };
-    throw error;
+    return { error: failure("enrollStudent", error) };
   }
 }
 
@@ -140,8 +149,7 @@ export async function updateProfile(
       photo: textField(formData, "photo"),
     });
   } catch (error) {
-    if (error instanceof TRPCError) return { error: messageOf(error) };
-    throw error;
+    return { error: failure("updateProfile", error) };
   }
   revalidatePath("/teacher", "layout");
   return { saved: "Profile saved." };
@@ -160,8 +168,7 @@ export async function changeEmail(
     revalidatePath("/teacher", "layout");
     return { saved: `You now sign in with ${email}.` };
   } catch (error) {
-    if (error instanceof TRPCError) return { error: messageOf(error) };
-    throw error;
+    return { error: failure("changeEmail", error) };
   }
 }
 
@@ -207,8 +214,7 @@ export async function saveSection(
       });
     }
   } catch (error) {
-    if (error instanceof TRPCError) return { error: messageOf(error) };
-    throw error;
+    return { error: failure("saveSection", error) };
   }
 
   revalidatePath("/teacher", "layout");
@@ -225,8 +231,7 @@ export async function deleteSection(
       sectionId: textField(formData, "sectionId"),
     });
   } catch (error) {
-    if (error instanceof TRPCError) return { error: messageOf(error) };
-    throw error;
+    return { error: failure("deleteSection", error) };
   }
   revalidatePath("/teacher", "layout");
   return { saved: "Section deleted." };
