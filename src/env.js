@@ -33,7 +33,10 @@ export const env = createEnv({
      * schools.
      */
     ALLOW_ANY_STUDENT_EMAIL: z
-      .enum(["true", "false"])
+      .string()
+      // Dashboards and `echo … | vercel env add` can leave a trailing newline.
+      .trim()
+      .pipe(z.enum(["true", "false"]))
       .default("false")
       .transform((value) => value === "true"),
     /**
@@ -42,7 +45,10 @@ export const env = createEnv({
      * database — a reset wipes every user.
      */
     DEMO_MODE: z
-      .enum(["true", "false"])
+      .string()
+      // Dashboards and `echo … | vercel env add` can leave a trailing newline.
+      .trim()
+      .pipe(z.enum(["true", "false"]))
       .default("false")
       .transform((value) => value === "true"),
     /** Bearer token the demo reset route requires. */
